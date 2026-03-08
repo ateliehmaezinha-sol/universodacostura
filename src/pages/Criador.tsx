@@ -103,8 +103,9 @@ export default function Criador() {
       return;
     }
 
+    const imagemLink = publicImageUrl ? `\n\n📸 Veja a imagem: ${publicImageUrl}` : "";
     const mensagem = encodeURIComponent(
-      `✨ Olha a criação que fiz para você!\n\n👗 ${comando}\n\n📎 A imagem da peça está em anexo. O que achou?`
+      `✨ Olha a criação que fiz para você!\n\n👗 ${comando}${imagemLink}\n\nO que achou?`
     );
 
     const whatsappUrl = `https://wa.me/${numeroFormatado}?text=${mensagem}`;
