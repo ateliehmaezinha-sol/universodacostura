@@ -328,13 +328,16 @@ export default function Tecidos() {
         <p className="text-sm text-muted-foreground mb-4">{filtrados.length} tecido{filtrados.length !== 1 ? "s" : ""} encontrado{filtrados.length !== 1 ? "s" : ""}</p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filtrados.map((t, i) => (
+          {filtrados.map((t, i) => {
+            const dicas = dicasBase[t.nome];
+            const isOpen = expandido === t.nome;
+            return (
             <motion.div
               key={t.nome}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.03 }}
-              className="bg-card border border-border rounded-2xl p-5 card-hover"
+              className="bg-card border border-border rounded-2xl p-5 card-hover flex flex-col"
             >
               <div className="flex items-center gap-3 mb-3">
                 <span className="text-3xl">{t.emoji}</span>
@@ -347,7 +350,7 @@ export default function Tecidos() {
                   )}
                 </div>
               </div>
-              <div className="space-y-1.5 text-sm">
+              <div className="space-y-1.5 text-sm flex-1">
                 <p><span className="text-muted-foreground">Composição:</span> {t.composicao}</p>
                 <p><span className="text-muted-foreground">Gramatura:</span> {t.gramatura}</p>
                 <p><span className="text-muted-foreground">Elasticidade:</span> {t.elasticidade}</p>
@@ -359,14 +362,63 @@ export default function Tecidos() {
                 <div className="pt-1 border-t border-border mt-2">
                   <p className="mt-2"><span className="text-muted-foreground">🧵 Forro:</span> {t.forro}</p>
                 </div>
-                <div className="pt-2">
+                <div className="pt-2 flex items-center gap-2 flex-wrap">
                   <span className={`text-xs px-3 py-1 rounded-full font-medium ${getDificuldadeStyle(t.dificuldade)}`}>
                     {t.dificuldade}
                   </span>
                 </div>
               </div>
+
+              {/* Botão expandir */}
+              {dicas && (
+                <button
+                  onClick={() => setExpandido(isOpen ? null : t.nome)}
+                  className="mt-3 flex items-center justify-center gap-2 w-full py-2 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-all border border-border/50"
+                >
+                  <Scissors size={14} />
+                  {isOpen ? "Ocultar dicas" : "Dicas de costura, corte e lavagem"}
+                  <ChevronDown size={14} className={`transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                </button>
+              )}
+
+              <AnimatePresence>
+                {isOpen && dicas && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.25 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="mt-3 space-y-3 text-sm border-t border-border pt-3">
+                      <div className="bg-accent/30 rounded-xl p-3">
+                        <div className="flex items-center gap-2 font-semibold text-foreground mb-1">
+                          <Scissors size={14} className="text-primary" />
+                          Dicas de Costura
+                        </div>
+                        <p className="text-muted-foreground leading-relaxed">{dicas.dicasCostura}</p>
+                      </div>
+                      <div className="bg-accent/30 rounded-xl p-3">
+                        <div className="flex items-center gap-2 font-semibold text-foreground mb-1">
+                          <Ruler size={14} className="text-primary" />
+                          Como Cortar
+                        </div>
+                        <p className="text-muted-foreground leading-relaxed">{dicas.comoCortar}</p>
+                      </div>
+                      <div className="bg-accent/30 rounded-xl p-3">
+                        <div className="flex items-center gap-2 font-semibold text-foreground mb-1">
+                          <Droplets size={14} className="text-primary" />
+                          Cuidados de Lavagem
+                        </div>
+                        <p className="text-muted-foreground leading-relaxed">{dicas.lavagem}</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
-          ))}
+            );
+          })}
         </div>
       </motion.div>
     </AppLayout>
