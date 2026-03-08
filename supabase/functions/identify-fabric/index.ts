@@ -107,12 +107,49 @@ Responda APENAS em formato JSON válido, sem markdown, sem código, apenas o JSO
     // Parse the JSON from the AI response
     let fabricInfo;
     try {
-      // Try to extract JSON from the response (handle potential markdown wrapping)
       const jsonMatch = content.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        fabricInfo = JSON.parse(jsonMatch[0]);
-      } else {
-        throw new Error("No JSON found in response");
+      if (!jsonMatch) throw new Error("No JSON found in response");
+      
+      let jsonStr = jsonMatch[0];
+      // Fix unescaped quotes inside string values by replacing inner quotes
+      // First try direct parse
+      try {
+        fabricInfo = JSON.parse(jsonStr);
+      } catch {
+        // Remove control characters and fix common JSON issues
+        jsonStr = jsonStr
+          .replace(/[\x00-\x1F\x7F]/g, (ch) => ch === '\n' || ch === '\r' || ch === '\t' ? ch : '')
+          .replace(/\n/g, ' ')
+          .replace(/\r/g, '')
+          .replace(/\t/g, ' ');
+        
+        // Try to extract values manually if JSON.parse still fails
+        try {
+          fabricInfo = JSON.parse(jsonStr);
+        } catch {
+          // Last resort: extract key-value pairs with regex
+          const extract = (key: string): string => {
+            const re = new RegExp(`"${key}"\\s*:\\s*"((?:[^"\\\\]|\\\\.|"(?!\\s*[,}]))*)"`, 's');
+            const m = jsonStr.match(re);
+            return m ? m[1].replace(/"/g, '') : '';
+          };
+          fabricInfo = {
+            nome: extract('nome'),
+            composicao: extract('composicao'),
+            caimento: extract('caimento'),
+            elasticidade: extract('elasticidade'),
+            dificuldade: extract('dificuldade'),
+            roupas: extract('roupas'),
+            forro: extract('forro'),
+            agulha: extract('agulha'),
+            linha: extract('linha'),
+            confianca: extract('confianca'),
+            observacoes: extract('observacoes'),
+          };
+          if (!fabricInfo.nome) {
+            throw new Error("Could not extract fabric name");
+          }
+        }
       }
     } catch (parseError) {
       console.error("Failed to parse AI response:", content);
