@@ -218,6 +218,60 @@ const tecidos: Tecido[] = [
 const dificuldades = ["Todos", "Fácil", "Médio", "Avançado"] as const;
 const categorias = ["Todos", "Leve", "Estruturado", "Versátil"] as const;
 
+type ForroInfo = {
+  nome: string;
+  emoji: string;
+  composicao: string;
+  toque: string;
+  peso: string;
+  respirabilidade: string;
+  transparencia: string;
+  preco: string;
+  indicado: string;
+  naoIndicado: string;
+  cuidados: string;
+  diferencial: string;
+};
+
+function ForroCard({ nome, emoji, composicao, toque, peso, respirabilidade, transparencia, preco, indicado, naoIndicado, cuidados, diferencial }: ForroInfo) {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-3 mb-1">
+        <span className="text-3xl">{emoji}</span>
+        <h3 className="font-display text-xl font-semibold">{nome}</h3>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="bg-accent/30 rounded-xl p-3 space-y-1.5 text-sm">
+          <p><span className="text-muted-foreground font-medium">Composição:</span> {composicao}</p>
+          <p><span className="text-muted-foreground font-medium">Toque:</span> {toque}</p>
+          <p><span className="text-muted-foreground font-medium">Peso:</span> {peso}</p>
+          <p><span className="text-muted-foreground font-medium">Respirabilidade:</span> {respirabilidade}</p>
+          <p><span className="text-muted-foreground font-medium">Transparência:</span> {transparencia}</p>
+          <p><span className="text-muted-foreground font-medium">Preço:</span> {preco}</p>
+        </div>
+        <div className="space-y-3 text-sm">
+          <div className="bg-green-100 dark:bg-green-900/20 rounded-xl p-3">
+            <p className="font-semibold text-green-700 dark:text-green-400 mb-1">✅ Indicado para:</p>
+            <p className="text-green-800 dark:text-green-300">{indicado}</p>
+          </div>
+          <div className="bg-red-100 dark:bg-red-900/20 rounded-xl p-3">
+            <p className="font-semibold text-red-700 dark:text-red-400 mb-1">❌ Não indicado para:</p>
+            <p className="text-red-800 dark:text-red-300">{naoIndicado}</p>
+          </div>
+        </div>
+      </div>
+      <div className="bg-accent/20 rounded-xl p-3 text-sm">
+        <p className="font-semibold text-foreground mb-1">🧼 Cuidados:</p>
+        <p className="text-muted-foreground">{cuidados}</p>
+      </div>
+      <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 text-sm">
+        <p className="font-semibold text-primary mb-1">⭐ Diferencial:</p>
+        <p className="text-foreground">{diferencial}</p>
+      </div>
+    </div>
+  );
+}
+
 export default function Tecidos() {
   const [busca, setBusca] = useState("");
   const [filtroDificuldade, setFiltroDificuldade] = useState<string>("Todos");
