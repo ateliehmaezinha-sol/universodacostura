@@ -36,7 +36,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         <button onClick={() => setSidebarOpen(true)} className="text-primary-foreground">
           <Menu size={24} />
         </button>
-        <h1 className="font-display text-lg text-primary-foreground">Ateliê Mãezinha</h1>
+        <h1 className="font-display text-lg text-primary-foreground">Atelieh Mãezinha</h1>
         <div className="w-6" />
       </header>
 
