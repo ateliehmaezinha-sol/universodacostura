@@ -798,6 +798,7 @@ export default function Tecidos() {
           {filtrados.map((t, i) => {
             const dicas = dicasBase[t.nome];
             const isOpen = expandido === t.nome;
+            const isInComparison = comparar[0] === t.nome || comparar[1] === t.nome;
             return (
             <motion.div
               key={t.nome}
