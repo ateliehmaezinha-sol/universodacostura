@@ -370,7 +370,21 @@ export default function Tecidos() {
           />
         </div>
 
-        {/* Filtro por tipo de tecido */}
+        {/* Filtro de Favoritos */}
+        <div className="mb-3">
+          <button
+            onClick={() => setMostrarFavoritos(!mostrarFavoritos)}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${
+              mostrarFavoritos
+                ? "bg-primary text-primary-foreground shadow-md"
+                : "bg-muted text-muted-foreground hover:bg-accent"
+            }`}
+          >
+            <Heart size={14} className={mostrarFavoritos ? "fill-current" : ""} />
+            Favoritos ({favoritos.length})
+          </button>
+        </div>
+
         <div className="mb-3">
           <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">Tipo de tecido</p>
           <div className="flex flex-wrap gap-2">
