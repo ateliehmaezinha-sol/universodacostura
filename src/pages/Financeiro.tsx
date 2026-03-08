@@ -196,7 +196,7 @@ export default function Financeiro() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           {stats.map((s) => (
-            <div key={s.label} className={\`\${s.color} rounded-2xl p-6 border border-border shadow-sm\`}>
+            <div key={s.label} className={`${s.color} rounded-2xl p-6 border border-border shadow-sm`}>
               <div className="flex items-center gap-2 mb-2">
                 <s.icon size={18} />
                 <span className="text-sm font-medium">{s.label}</span>
