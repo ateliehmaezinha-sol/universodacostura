@@ -603,6 +603,195 @@ export default function Tecidos() {
           </AnimatePresence>
         </div>
 
+        {/* Comparador de Tecidos */}
+        <div className="mb-6">
+          <button
+            onClick={() => setComparadorAberto(!comparadorAberto)}
+            className="w-full flex items-center justify-between gap-3 px-5 py-4 rounded-2xl bg-gradient-to-r from-accent/30 to-primary/10 border border-border hover:border-primary/30 transition-all"
+          >
+            <div className="flex items-center gap-3">
+              <GitCompareArrows size={20} className="text-primary" />
+              <div className="text-left">
+                <span className="font-display font-semibold text-lg">⚖️ Comparar Tecidos</span>
+                <p className="text-xs text-muted-foreground">Selecione dois tecidos para ver as diferenças lado a lado</p>
+              </div>
+            </div>
+            {comparadorAberto ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+          </button>
+
+          <AnimatePresence>
+            {comparadorAberto && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="overflow-hidden"
+              >
+                <div className="mt-4 bg-card border border-border rounded-2xl p-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground mb-2 block">Tecido 1</label>
+                      <Select value={comparar[0] || ""} onValueChange={(v) => setComparar([v, comparar[1]])}>
+                        <SelectTrigger className="rounded-xl">
+                          <SelectValue placeholder="Selecione o primeiro tecido" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {tecidos.map(t => (
+                            <SelectItem key={t.nome} value={t.nome} disabled={t.nome === comparar[1]}>
+                              {t.emoji} {t.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground mb-2 block">Tecido 2</label>
+                      <Select value={comparar[1] || ""} onValueChange={(v) => setComparar([comparar[0], v])}>
+                        <SelectTrigger className="rounded-xl">
+                          <SelectValue placeholder="Selecione o segundo tecido" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {tecidos.map(t => (
+                            <SelectItem key={t.nome} value={t.nome} disabled={t.nome === comparar[0]}>
+                              {t.emoji} {t.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {comparar[0] && comparar[1] && (
+                    <button
+                      onClick={() => setComparar([null, null])}
+                      className="mb-4 text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+                    >
+                      <X size={12} /> Limpar seleção
+                    </button>
+                  )}
+
+                  {tecido1 && tecido2 ? (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b border-border">
+                            <th className="text-left py-3 px-3 text-muted-foreground font-medium w-1/4">Propriedade</th>
+                            <th className="text-left py-3 px-3 font-semibold w-[37.5%]">
+                              <span className="text-2xl mr-2">{tecido1.emoji}</span>{tecido1.nome}
+                            </th>
+                            <th className="text-left py-3 px-3 font-semibold w-[37.5%]">
+                              <span className="text-2xl mr-2">{tecido2.emoji}</span>{tecido2.nome}
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {[
+                            { label: "Composição", key: "composicao" as const },
+                            { label: "Gramatura", key: "gramatura" as const },
+                            { label: "Elasticidade", key: "elasticidade" as const },
+                            { label: "Caimento", key: "caimento" as const },
+                            { label: "Roupas ideais", key: "roupas" as const },
+                            { label: "Forro", key: "forro" as const },
+                            { label: "Dificuldade", key: "dificuldade" as const },
+                          ].map((row, idx) => (
+                            <tr key={row.key} className={idx % 2 === 0 ? "bg-accent/20" : ""}>
+                              <td className="py-3 px-3 text-muted-foreground font-medium">{row.label}</td>
+                              <td className="py-3 px-3">
+                                {row.key === "dificuldade" ? (
+                                  <span className={`text-xs px-3 py-1 rounded-full font-medium ${getDificuldadeStyle(tecido1[row.key])}`}>
+                                    {tecido1[row.key]}
+                                  </span>
+                                ) : tecido1[row.key]}
+                              </td>
+                              <td className="py-3 px-3">
+                                {row.key === "dificuldade" ? (
+                                  <span className={`text-xs px-3 py-1 rounded-full font-medium ${getDificuldadeStyle(tecido2[row.key])}`}>
+                                    {tecido2[row.key]}
+                                  </span>
+                                ) : tecido2[row.key]}
+                              </td>
+                            </tr>
+                          ))}
+                          {(tecido1.categoria || tecido2.categoria) && (
+                            <tr className="bg-accent/20">
+                              <td className="py-3 px-3 text-muted-foreground font-medium">Categoria</td>
+                              <td className="py-3 px-3">
+                                {tecido1.categoria && (
+                                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${getCategoriaStyle(tecido1.categoria)}`}>
+                                    {tecido1.categoria}
+                                  </span>
+                                )}
+                              </td>
+                              <td className="py-3 px-3">
+                                {tecido2.categoria && (
+                                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${getCategoriaStyle(tecido2.categoria)}`}>
+                                    {tecido2.categoria}
+                                  </span>
+                                )}
+                              </td>
+                            </tr>
+                          )}
+                          {(tecido1.modelosIndicados || tecido2.modelosIndicados) && (
+                            <tr>
+                              <td className="py-3 px-3 text-muted-foreground font-medium">Modelos indicados</td>
+                              <td className="py-3 px-3 text-primary font-medium">{tecido1.modelosIndicados || "—"}</td>
+                              <td className="py-3 px-3 text-primary font-medium">{tecido2.modelosIndicados || "—"}</td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+
+                      {/* Dicas comparadas */}
+                      {(dicasBase[tecido1.nome] || dicasBase[tecido2.nome]) && (
+                        <div className="mt-4 border-t border-border pt-4">
+                          <p className="font-semibold text-sm mb-3 flex items-center gap-2">
+                            <Scissors size={14} className="text-primary" />
+                            Comparação de Dicas Técnicas
+                          </p>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {[tecido1, tecido2].map((t) => {
+                              const d = dicasBase[t.nome];
+                              return (
+                                <div key={t.nome} className="space-y-2">
+                                  <p className="font-semibold text-sm">{t.emoji} {t.nome}</p>
+                                  {d ? (
+                                    <>
+                                      <div className="bg-accent/30 rounded-lg p-2.5 text-xs">
+                                        <p className="font-semibold mb-1 flex items-center gap-1"><Scissors size={12} className="text-primary" /> Costura</p>
+                                        <p className="text-muted-foreground leading-relaxed">{d.dicasCostura}</p>
+                                      </div>
+                                      <div className="bg-accent/30 rounded-lg p-2.5 text-xs">
+                                        <p className="font-semibold mb-1 flex items-center gap-1"><Ruler size={12} className="text-primary" /> Corte</p>
+                                        <p className="text-muted-foreground leading-relaxed">{d.comoCortar}</p>
+                                      </div>
+                                      <div className="bg-accent/30 rounded-lg p-2.5 text-xs">
+                                        <p className="font-semibold mb-1 flex items-center gap-1"><Droplets size={12} className="text-primary" /> Lavagem</p>
+                                        <p className="text-muted-foreground leading-relaxed">{d.lavagem}</p>
+                                      </div>
+                                    </>
+                                  ) : (
+                                    <p className="text-xs text-muted-foreground italic">Dicas não disponíveis para este tecido</p>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </motion.div>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <GitCompareArrows size={32} className="mx-auto mb-2 opacity-30" />
+                      <p className="text-sm">Selecione dois tecidos acima para ver a comparação</p>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
         <p className="text-sm text-muted-foreground mb-4">{filtrados.length} tecido{filtrados.length !== 1 ? "s" : ""} encontrado{filtrados.length !== 1 ? "s" : ""}</p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
