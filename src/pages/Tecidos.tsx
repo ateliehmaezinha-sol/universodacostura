@@ -306,6 +306,7 @@ export default function Tecidos() {
   const buscaNormalizada = normalizeText(busca.trim());
 
   const filtrados = tecidos.filter((t) => {
+    if (mostrarFavoritos && !favoritos.includes(t.nome)) return false;
     if (filtroDificuldade !== "Todos" && t.dificuldade !== filtroDificuldade) return false;
     if (filtroCategoria !== "Todos" && t.categoria !== filtroCategoria) return false;
     if (!buscaNormalizada) return true;
