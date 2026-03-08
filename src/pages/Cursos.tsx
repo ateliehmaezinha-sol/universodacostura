@@ -33,8 +33,8 @@ const cursos = [
     destaque: true,
   },
   {
-    titulo: "Camisa Feminina",
-    desc: "Aprenda a confeccionar camisas femininas elegantes. Golas, punhos, pences e acabamentos impecáveis passo a passo.",
+    titulo: "Camisa Feminina – 100% Online",
+    desc: "Curso prático e descomplicado! Aprenda do zero ao acabamento perfeito usando base de modelagem do padrão industrial. Tire medidas, modele, corte e costure camisas femininas exclusivas. Inclui suporte VIP no Telegram, mentoria por videochamada e comunidade de apoio. Aprenda também a vender suas camisas e criar um negócio lucrativo!",
     emoji: "👔",
   },
 ];
