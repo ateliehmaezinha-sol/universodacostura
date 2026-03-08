@@ -67,6 +67,7 @@ export default function Criador() {
 
       if (data?.imageUrl) {
         setImagemGerada(data.imageUrl);
+        setPublicImageUrl(data.publicImageUrl || null);
         setDescricao(data.description || null);
         toast.success("Criação gerada com sucesso!");
       } else {
