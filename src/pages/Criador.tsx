@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Camera, Sparkles, Download, Loader2, RefreshCw, MessageCircle } from "lucide-react";
+import { Camera, Sparkles, Download, Loader2, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
