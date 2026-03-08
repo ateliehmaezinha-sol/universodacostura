@@ -274,6 +274,17 @@ export default function Criador() {
                           <MessageCircle size={14} className="mr-1" /> Enviar
                         </Button>
                       </div>
+
+                      {whatsAppLinkManual && (
+                        <a
+                          href={whatsAppLinkManual}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex mt-2 text-xs text-accent underline underline-offset-4"
+                        >
+                          Se não abrir automaticamente, toque aqui para abrir o WhatsApp
+                        </a>
+                      )}
                     </div>
                   </div>
                 </div>
