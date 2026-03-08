@@ -1,8 +1,8 @@
-import { useState, useRef } from "react";
-import { motion } from "framer-motion";
+import { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
-import { Camera, Upload, Loader2 } from "lucide-react";
+import { Camera, Upload, Loader2, History, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -20,11 +20,72 @@ interface FabricInfo {
   observacoes?: string;
 }
 
+interface HistoryItem {
+  id: string;
+  data: string;
+  thumbnail: string;
+  info: FabricInfo;
+}
+
+const HISTORY_KEY = "atelie_fabric_history";
+
+function loadHistory(): HistoryItem[] {
+  try {
+    return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+  } catch { return []; }
+}
+
+function saveHistory(items: HistoryItem[]) {
+  // Keep max 20 items, store small thumbnails
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(items.slice(0, 20)));
+}
+
+function resizeImage(base64: string, maxW = 120): Promise<string> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      const ratio = maxW / img.width;
+      canvas.width = maxW;
+      canvas.height = img.height * ratio;
+      canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL("image/jpeg", 0.6));
+    };
+    img.src = base64;
+  });
+}
+
 export default function Identificador() {
   const [imagem, setImagem] = useState<string | null>(null);
   const [resultado, setResultado] = useState<FabricInfo | null>(null);
   const [loading, setLoading] = useState(false);
+  const [historico, setHistorico] = useState<HistoryItem[]>(loadHistory);
+  const [showHistory, setShowHistory] = useState(false);
+  const [expandedItem, setExpandedItem] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { saveHistory(historico); }, [historico]);
+
+  const addToHistory = async (info: FabricInfo, imageBase64: string) => {
+    const thumbnail = await resizeImage(imageBase64);
+    const item: HistoryItem = {
+      id: Date.now().toString(),
+      data: new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }),
+      thumbnail,
+      info,
+    };
+    setHistorico(prev => [item, ...prev]);
+  };
+
+  const removeFromHistory = (id: string) => {
+    setHistorico(prev => prev.filter(h => h.id !== id));
+    toast.success("Removido do histórico");
+  };
+
+  const clearHistory = () => {
+    setHistorico([]);
+    toast.success("Histórico limpo");
+  };
 
   const identificarTecido = async (imageBase64: string) => {
     setLoading(true);
@@ -33,16 +94,12 @@ export default function Identificador() {
       const { data, error } = await supabase.functions.invoke("identify-fabric", {
         body: { imageBase64 },
       });
+      if (error) throw new Error(error.message || "Erro ao identificar tecido");
+      if (data?.error) throw new Error(data.error);
 
-      if (error) {
-        throw new Error(error.message || "Erro ao identificar tecido");
-      }
-
-      if (data?.error) {
-        throw new Error(data.error);
-      }
-
-      setResultado(data as FabricInfo);
+      const fabricInfo = data as FabricInfo;
+      setResultado(fabricInfo);
+      await addToHistory(fabricInfo, imageBase64);
       toast.success(`Tecido identificado: ${data.nome}`);
     } catch (err: any) {
       console.error("Erro:", err);
@@ -165,6 +222,101 @@ export default function Identificador() {
               )}
             </motion.div>
           )}
+        </div>
+
+        {/* Histórico */}
+        <div className="mt-10">
+          <button
+            onClick={() => setShowHistory(!showHistory)}
+            className="flex items-center gap-2 text-lg font-display font-semibold text-foreground mb-4"
+          >
+            <History size={20} className="text-accent" />
+            Histórico de Identificações ({historico.length})
+            {showHistory ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+          </button>
+
+          <AnimatePresence>
+            {showHistory && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="overflow-hidden"
+              >
+                {historico.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-4">Nenhuma identificação ainda. Envie uma foto acima!</p>
+                ) : (
+                  <>
+                    <div className="flex justify-end mb-3">
+                      <Button variant="ghost" size="sm" onClick={clearHistory} className="text-destructive hover:text-destructive">
+                        <Trash2 size={14} className="mr-1" /> Limpar histórico
+                      </Button>
+                    </div>
+                    <div className="space-y-3">
+                      {historico.map((item) => (
+                        <motion.div
+                          key={item.id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="bg-card border border-border rounded-xl overflow-hidden"
+                        >
+                          <button
+                            onClick={() => setExpandedItem(expandedItem === item.id ? null : item.id)}
+                            className="w-full flex items-center gap-4 p-4 text-left hover:bg-accent/5 transition-colors"
+                          >
+                            <img src={item.thumbnail} alt={item.info.nome} className="w-14 h-14 rounded-lg object-cover flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-foreground truncate">{item.info.nome}</p>
+                              <p className="text-xs text-muted-foreground">{item.data}</p>
+                            </div>
+                            {item.info.confianca && (
+                              <span className={`text-xs px-2 py-0.5 rounded-full flex-shrink-0 ${
+                                item.info.confianca === "Alta" ? "bg-green-500/20 text-green-400" :
+                                item.info.confianca === "Média" ? "bg-yellow-500/20 text-yellow-400" :
+                                "bg-red-500/20 text-red-400"
+                              }`}>
+                                {item.info.confianca}
+                              </span>
+                            )}
+                            {expandedItem === item.id ? <ChevronUp size={16} className="text-muted-foreground" /> : <ChevronDown size={16} className="text-muted-foreground" />}
+                          </button>
+
+                          <AnimatePresence>
+                            {expandedItem === item.id && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                className="overflow-hidden"
+                              >
+                                <div className="px-4 pb-4 grid grid-cols-2 gap-x-4 gap-y-2 text-sm border-t border-border pt-3">
+                                  <p><span className="text-muted-foreground">Composição:</span> {item.info.composicao}</p>
+                                  <p><span className="text-muted-foreground">Caimento:</span> {item.info.caimento}</p>
+                                  <p><span className="text-muted-foreground">Elasticidade:</span> {item.info.elasticidade}</p>
+                                  <p><span className="text-muted-foreground">Dificuldade:</span> {item.info.dificuldade}</p>
+                                  <p className="col-span-2"><span className="text-muted-foreground">Roupas:</span> {item.info.roupas}</p>
+                                  <p><span className="text-muted-foreground">Agulha:</span> {item.info.agulha}</p>
+                                  <p><span className="text-muted-foreground">Linha:</span> {item.info.linha}</p>
+                                  {item.info.observacoes && (
+                                    <p className="col-span-2 text-muted-foreground italic">{item.info.observacoes}</p>
+                                  )}
+                                  <div className="col-span-2 flex justify-end mt-1">
+                                    <Button variant="ghost" size="sm" onClick={() => removeFromHistory(item.id)} className="text-destructive hover:text-destructive text-xs">
+                                      <Trash2 size={12} className="mr-1" /> Remover
+                                    </Button>
+                                  </div>
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </motion.div>
     </AppLayout>
