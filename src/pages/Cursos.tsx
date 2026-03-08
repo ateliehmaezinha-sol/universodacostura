@@ -5,11 +5,12 @@ import { ExternalLink } from "lucide-react";
 
 const cursos = [
   {
-    titulo: "Modelagem Feminina",
-    desc: "Aprenda a criar moldes profissionais do zero. Curso completo para iniciantes e intermediárias que desejam dominar a arte da modelagem.",
-    emoji: "📐",
+    titulo: "Loja das Musas – Universo da Costura com a Sol",
+    desc: "Encontre tudo para sua costura: aviamentos, tecidos, suplementos e produtos de autocuidado pessoal. O cantinho especial das costureiras!",
+    emoji: "🛍️",
     destaque: true,
-    link: "",
+    botao: "Visitar Loja",
+    link: "https://www.lojadasmusas.com/universodacosturadasol",
   },
   {
     titulo: "Interpretação de Modelagem Feminina + Calças",
