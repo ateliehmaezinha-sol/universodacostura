@@ -73,16 +73,31 @@ export default function Cursos() {
               <p className={`text-sm flex-1 mb-6 ${c.destaque ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
                 {c.desc}
               </p>
-              <Button
-                className={`w-full rounded-xl ${
-                  c.destaque
-                    ? "bg-accent text-accent-foreground hover:bg-gold-dark"
-                    : "bg-primary text-primary-foreground hover:bg-primary/90"
-                }`}
-              >
-                <ExternalLink size={16} className="mr-2" />
-                Saiba Mais
-              </Button>
+              {c.link ? (
+                <a href={c.link} target="_blank" rel="noopener noreferrer" className="w-full">
+                  <Button
+                    className={`w-full rounded-xl ${
+                      c.destaque
+                        ? "bg-accent text-accent-foreground hover:bg-gold-dark"
+                        : "bg-primary text-primary-foreground hover:bg-primary/90"
+                    }`}
+                  >
+                    <ExternalLink size={16} className="mr-2" />
+                    Comprar Curso
+                  </Button>
+                </a>
+              ) : (
+                <Button
+                  className={`w-full rounded-xl ${
+                    c.destaque
+                      ? "bg-accent text-accent-foreground hover:bg-gold-dark"
+                      : "bg-primary text-primary-foreground hover:bg-primary/90"
+                  }`}
+                  disabled
+                >
+                  Em breve
+                </Button>
+              )}
             </motion.div>
           ))}
         </div>
