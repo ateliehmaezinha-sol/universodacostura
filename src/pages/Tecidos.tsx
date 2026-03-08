@@ -2,7 +2,8 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
 import { Input } from "@/components/ui/input";
-import { Search, ChevronDown, Scissors, Droplets, Ruler } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Search, ChevronDown, Scissors, Droplets, Ruler, BookOpen, ChevronUp } from "lucide-react";
 
 type Tecido = {
   nome: string;
