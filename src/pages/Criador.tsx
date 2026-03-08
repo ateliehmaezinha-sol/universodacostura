@@ -22,6 +22,7 @@ export default function Criador() {
   const [imagemGerada, setImagemGerada] = useState<string | null>(null);
   const [descricao, setDescricao] = useState<string | null>(null);
   const [telefoneWhatsApp, setTelefoneWhatsApp] = useState("");
+  const [whatsAppLinkManual, setWhatsAppLinkManual] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
