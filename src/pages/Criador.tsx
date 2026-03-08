@@ -40,7 +40,6 @@ export default function Criador() {
 
     setGerando(true);
     setImagemGerada(null);
-    setPublicImageUrl(null);
     setDescricao(null);
 
     try {
