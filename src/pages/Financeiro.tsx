@@ -177,7 +177,7 @@ export default function Financeiro() {
     { label: "Lucro Líquido", value: lucro, icon: TrendingUp, color: "bg-primary text-primary-foreground" },
   ];
 
-  const formatCurrency = (val: number) => \`R$ ${val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\`;
+  const formatCurrency = (val: number) => `R$ ${val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   return (
     <AppLayout>
