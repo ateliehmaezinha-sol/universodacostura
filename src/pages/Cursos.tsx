@@ -22,7 +22,7 @@ const cursos = [
   },
   {
     titulo: "Costura Profissional",
-    desc: "Do básico ao avançado: aprenda técnicas profissionais de costura, acabamento e uso correto de máquinas e ferramentas.",
+    desc: "Da modelagem ao acabamento, ensino técnicas exclusivas usando base de modelagem do padrão industrial com as Réguas LD Molde Perfeito. Aqui no Atelieh Mãezinha a cliente prova uma vez só — já ensinei muitas alunas a fazer o mesmo, e o resultado surpreende até as clientes!",
     emoji: "🧵",
     destaque: true,
   },
