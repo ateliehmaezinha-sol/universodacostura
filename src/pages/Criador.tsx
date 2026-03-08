@@ -90,19 +90,19 @@ export default function Criador() {
       toast.error("Digite o número do WhatsApp do cliente");
       return;
     }
-    // Clean phone number
     const numero = telefoneWhatsApp.replace(/\D/g, "");
     const numeroFormatado = numero.startsWith("55") ? numero : `55${numero}`;
     
-    // First download the image so user has it ready to attach
-    baixarImagem();
-
     const mensagem = encodeURIComponent(
       `✨ Olha a criação que fiz para você!\n\n👗 ${comando}\n\n📎 A imagem da peça está em anexo. O que achou?`
     );
     
+    // Open WhatsApp first (uses the user gesture so it won't be blocked)
     window.open(`https://wa.me/${numeroFormatado}?text=${mensagem}`, "_blank");
-    toast.success("WhatsApp aberto! Anexe a imagem baixada na conversa.");
+    
+    // Then download the image after a small delay
+    setTimeout(() => baixarImagem(), 500);
+    toast.success("WhatsApp aberto! A imagem foi baixada para você anexar.");
   };
 
   return (
