@@ -42,7 +42,7 @@ export default function Login() {
           >
             ✨
           </motion.div>
-          <h1 className="font-display text-3xl font-bold text-primary-foreground">Ateliê Mãezinha</h1>
+          <h1 className="font-display text-3xl font-bold text-primary-foreground">Atelieh Mãezinha</h1>
           <p className="text-primary-foreground/50 text-sm mt-1">Curso de Costura Estrelas de Sucesso Express</p>
           <p className="text-primary-foreground/40 text-xs mt-1">Universo da Costura com a Sol</p>
         </div>

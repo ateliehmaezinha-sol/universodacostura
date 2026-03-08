@@ -36,7 +36,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         <button onClick={() => setSidebarOpen(true)} className="text-primary-foreground">
           <Menu size={24} />
         </button>
-        <h1 className="font-display text-lg text-primary-foreground">Ateliê Mãezinha</h1>
+        <h1 className="font-display text-lg text-primary-foreground">Atelieh Mãezinha</h1>
         <div className="w-6" />
       </header>
 
@@ -59,7 +59,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
               className="lg:hidden fixed left-0 top-0 bottom-0 z-50 w-72 bg-primary p-6 flex flex-col"
             >
               <div className="flex items-center justify-between mb-8">
-                <span className="font-display text-xl text-primary-foreground">✨ Ateliê Mãezinha</span>
+                <span className="font-display text-xl text-primary-foreground">✨ Atelieh Mãezinha</span>
                 <button onClick={() => setSidebarOpen(false)} className="text-primary-foreground/70">
                   <X size={20} />
                 </button>
@@ -95,7 +95,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 w-64 bg-primary flex-col p-6 z-40">
         <div className="mb-10">
-          <h1 className="font-display text-2xl text-primary-foreground">✨ Ateliê</h1>
+          <h1 className="font-display text-2xl text-primary-foreground">✨ Atelieh</h1>
           <p className="font-display text-lg text-accent">Mãezinha</p>
           <p className="text-xs text-primary-foreground/40 mt-1">Estrelas de Sucesso Express</p>
         </div>
