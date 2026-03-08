@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Search, ChevronDown, Scissors, Droplets, Ruler } from "lucide-react";
 
 type Tecido = {
   nome: string;
