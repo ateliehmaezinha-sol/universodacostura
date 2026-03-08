@@ -223,6 +223,7 @@ export default function Tecidos() {
   const [filtroDificuldade, setFiltroDificuldade] = useState<string>("Todos");
   const [filtroCategoria, setFiltroCategoria] = useState<string>("Todos");
   const [expandido, setExpandido] = useState<string | null>(null);
+  const [guiaForrosAberto, setGuiaForrosAberto] = useState(false);
 
   const normalizeText = (text: string) => {
     return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
