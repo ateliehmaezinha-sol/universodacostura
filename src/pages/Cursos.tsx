@@ -84,7 +84,7 @@ export default function Cursos() {
                     }`}
                   >
                     <ExternalLink size={16} className="mr-2" />
-                    Comprar Curso
+                    {c.botao || "Comprar Curso"}
                   </Button>
                 </a>
               ) : (
