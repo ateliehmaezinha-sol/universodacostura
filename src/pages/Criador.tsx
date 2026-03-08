@@ -20,6 +20,7 @@ export default function Criador() {
   const [comando, setComando] = useState("");
   const [gerando, setGerando] = useState(false);
   const [imagemGerada, setImagemGerada] = useState<string | null>(null);
+  const [publicImageUrl, setPublicImageUrl] = useState<string | null>(null);
   const [descricao, setDescricao] = useState<string | null>(null);
   const [telefoneWhatsApp, setTelefoneWhatsApp] = useState("");
   const [whatsAppLinkManual, setWhatsAppLinkManual] = useState<string | null>(null);
@@ -42,6 +43,7 @@ export default function Criador() {
 
     setGerando(true);
     setImagemGerada(null);
+    setPublicImageUrl(null);
     setDescricao(null);
 
     try {
@@ -65,6 +67,7 @@ export default function Criador() {
 
       if (data?.imageUrl) {
         setImagemGerada(data.imageUrl);
+        setPublicImageUrl(data.publicImageUrl || null);
         setDescricao(data.description || null);
         toast.success("Criação gerada com sucesso!");
       } else {
@@ -100,8 +103,9 @@ export default function Criador() {
       return;
     }
 
+    const imagemLink = publicImageUrl ? `\n\n📸 Veja a imagem: ${publicImageUrl}` : "";
     const mensagem = encodeURIComponent(
-      `✨ Olha a criação que fiz para você!\n\n👗 ${comando}\n\n📎 A imagem da peça está em anexo. O que achou?`
+      `✨ Olha a criação que fiz para você!\n\n👗 ${comando}${imagemLink}\n\nO que achou?`
     );
 
     const whatsappUrl = `https://wa.me/${numeroFormatado}?text=${mensagem}`;
@@ -130,8 +134,7 @@ export default function Criador() {
       link.remove();
     }
 
-    setTimeout(() => baixarImagem(), 500);
-    toast.success("Se não abrir automaticamente, use o link manual abaixo.");
+    toast.success("WhatsApp aberto! A imagem vai como link na mensagem.");
   };
 
   return (
