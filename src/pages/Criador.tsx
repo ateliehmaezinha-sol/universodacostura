@@ -224,6 +224,28 @@ export default function Criador() {
                         <RefreshCw size={16} className="mr-2" /> Gerar Outra
                       </Button>
                     </div>
+                    
+                    {/* WhatsApp */}
+                    <div className="border-t border-border pt-3 mt-1">
+                      <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
+                        <MessageCircle size={12} /> Enviar para o cliente via WhatsApp
+                      </p>
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="(11) 99999-9999"
+                          value={telefoneWhatsApp}
+                          onChange={(e) => setTelefoneWhatsApp(e.target.value)}
+                          className="h-9 rounded-lg text-sm flex-1"
+                        />
+                        <Button
+                          onClick={enviarWhatsApp}
+                          disabled={!telefoneWhatsApp}
+                          className="h-9 rounded-lg bg-green-600 hover:bg-green-700 text-white text-xs px-3 disabled:opacity-40"
+                        >
+                          <MessageCircle size={14} className="mr-1" /> Enviar
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </motion.div>
