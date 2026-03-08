@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, ChevronDown, Scissors, Droplets, Ruler, BookOpen, ChevronUp, GitCompareArrows, X, Check } from "lucide-react";
+import { Search, ChevronDown, Scissors, Droplets, Ruler, BookOpen, ChevronUp, GitCompareArrows, X, Check, Heart } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type Tecido = {
@@ -281,6 +281,20 @@ export default function Tecidos() {
   const [guiaForrosAberto, setGuiaForrosAberto] = useState(false);
   const [comparar, setComparar] = useState<[string | null, string | null]>([null, null]);
   const [comparadorAberto, setComparadorAberto] = useState(false);
+  const [favoritos, setFavoritos] = useState<string[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem("tecidos-favoritos") || "[]");
+    } catch { return []; }
+  });
+  const [mostrarFavoritos, setMostrarFavoritos] = useState(false);
+
+  const toggleFavorito = (nome: string) => {
+    setFavoritos(prev => {
+      const next = prev.includes(nome) ? prev.filter(f => f !== nome) : [...prev, nome];
+      localStorage.setItem("tecidos-favoritos", JSON.stringify(next));
+      return next;
+    });
+  };
 
   const tecido1 = tecidos.find(t => t.nome === comparar[0]);
   const tecido2 = tecidos.find(t => t.nome === comparar[1]);
@@ -292,6 +306,7 @@ export default function Tecidos() {
   const buscaNormalizada = normalizeText(busca.trim());
 
   const filtrados = tecidos.filter((t) => {
+    if (mostrarFavoritos && !favoritos.includes(t.nome)) return false;
     if (filtroDificuldade !== "Todos" && t.dificuldade !== filtroDificuldade) return false;
     if (filtroCategoria !== "Todos" && t.categoria !== filtroCategoria) return false;
     if (!buscaNormalizada) return true;
@@ -355,7 +370,21 @@ export default function Tecidos() {
           />
         </div>
 
-        {/* Filtro por tipo de tecido */}
+        {/* Filtro de Favoritos */}
+        <div className="mb-3">
+          <button
+            onClick={() => setMostrarFavoritos(!mostrarFavoritos)}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${
+              mostrarFavoritos
+                ? "bg-primary text-primary-foreground shadow-md"
+                : "bg-muted text-muted-foreground hover:bg-accent"
+            }`}
+          >
+            <Heart size={14} className={mostrarFavoritos ? "fill-current" : ""} />
+            Favoritos ({favoritos.length})
+          </button>
+        </div>
+
         <div className="mb-3">
           <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">Tipo de tecido</p>
           <div className="flex flex-wrap gap-2">
@@ -807,16 +836,28 @@ export default function Tecidos() {
               transition={{ delay: i * 0.03 }}
               className="bg-card border border-border rounded-2xl p-5 card-hover flex flex-col"
             >
-              <div className="flex items-center gap-3 mb-3">
-                <span className="text-3xl">{t.emoji}</span>
-                <div>
-                  <h3 className="font-display text-xl font-semibold">{t.nome}</h3>
-                  {t.categoria && (
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${getCategoriaStyle(t.categoria)}`}>
-                      {t.categoria === "Leve" ? "🪶 Leve" : t.categoria === "Estruturado" ? "🧱 Estruturado" : "🔄 Versátil"}
-                    </span>
-                  )}
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <span className="text-3xl">{t.emoji}</span>
+                  <div>
+                    <h3 className="font-display text-xl font-semibold">{t.nome}</h3>
+                    {t.categoria && (
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${getCategoriaStyle(t.categoria)}`}>
+                        {t.categoria === "Leve" ? "🪶 Leve" : t.categoria === "Estruturado" ? "🧱 Estruturado" : "🔄 Versátil"}
+                      </span>
+                    )}
+                  </div>
                 </div>
+                <button
+                  onClick={() => toggleFavorito(t.nome)}
+                  className="p-1.5 rounded-lg hover:bg-accent/50 transition-colors"
+                  title={favoritos.includes(t.nome) ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+                >
+                  <Heart
+                    size={18}
+                    className={favoritos.includes(t.nome) ? "fill-red-500 text-red-500" : "text-muted-foreground"}
+                  />
+                </button>
               </div>
               <div className="space-y-1.5 text-sm flex-1">
                 <p><span className="text-muted-foreground">Composição:</span> {t.composicao}</p>
