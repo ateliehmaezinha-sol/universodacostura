@@ -279,6 +279,11 @@ export default function Tecidos() {
   const [filtroCategoria, setFiltroCategoria] = useState<string>("Todos");
   const [expandido, setExpandido] = useState<string | null>(null);
   const [guiaForrosAberto, setGuiaForrosAberto] = useState(false);
+  const [comparar, setComparar] = useState<[string | null, string | null]>([null, null]);
+  const [comparadorAberto, setComparadorAberto] = useState(false);
+
+  const tecido1 = tecidos.find(t => t.nome === comparar[0]);
+  const tecido2 = tecidos.find(t => t.nome === comparar[1]);
 
   const normalizeText = (text: string) => {
     return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
