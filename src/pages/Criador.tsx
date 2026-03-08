@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Camera, Sparkles, Download, Loader2, RefreshCw } from "lucide-react";
+import { Camera, Sparkles, Download, Loader2, RefreshCw, MessageCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -21,6 +21,7 @@ export default function Criador() {
   const [gerando, setGerando] = useState(false);
   const [imagemGerada, setImagemGerada] = useState<string | null>(null);
   const [descricao, setDescricao] = useState<string | null>(null);
+  const [telefoneWhatsApp, setTelefoneWhatsApp] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,6 +83,26 @@ export default function Criador() {
     link.href = imagemGerada;
     link.download = `criacao-${Date.now()}.png`;
     link.click();
+  };
+
+  const enviarWhatsApp = () => {
+    if (!telefoneWhatsApp) {
+      toast.error("Digite o número do WhatsApp do cliente");
+      return;
+    }
+    // Clean phone number
+    const numero = telefoneWhatsApp.replace(/\D/g, "");
+    const numeroFormatado = numero.startsWith("55") ? numero : `55${numero}`;
+    
+    // First download the image so user has it ready to attach
+    baixarImagem();
+
+    const mensagem = encodeURIComponent(
+      `✨ Olha a criação que fiz para você!\n\n👗 ${comando}\n\n📎 A imagem da peça está em anexo. O que achou?`
+    );
+    
+    window.open(`https://wa.me/${numeroFormatado}?text=${mensagem}`, "_blank");
+    toast.success("WhatsApp aberto! Anexe a imagem baixada na conversa.");
   };
 
   return (
@@ -202,6 +223,28 @@ export default function Criador() {
                       >
                         <RefreshCw size={16} className="mr-2" /> Gerar Outra
                       </Button>
+                    </div>
+                    
+                    {/* WhatsApp */}
+                    <div className="border-t border-border pt-3 mt-1">
+                      <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
+                        <MessageCircle size={12} /> Enviar para o cliente via WhatsApp
+                      </p>
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="(11) 99999-9999"
+                          value={telefoneWhatsApp}
+                          onChange={(e) => setTelefoneWhatsApp(e.target.value)}
+                          className="h-9 rounded-lg text-sm flex-1"
+                        />
+                        <Button
+                          onClick={enviarWhatsApp}
+                          disabled={!telefoneWhatsApp}
+                          className="h-9 rounded-lg bg-green-600 hover:bg-green-700 text-white text-xs px-3 disabled:opacity-40"
+                        >
+                          <MessageCircle size={14} className="mr-1" /> Enviar
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
