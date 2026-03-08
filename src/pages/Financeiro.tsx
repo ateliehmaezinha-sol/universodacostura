@@ -377,7 +377,7 @@ export default function Financeiro() {
                         <td className="p-4 font-medium">{s.cliente}</td>
                         <td className="p-4 text-muted-foreground">{s.tipo}</td>
                         <td className="p-4 text-center">
-                          <span className={\`px-2 py-1 rounded-full text-[10px] font-medium uppercase tracking-wider \${s.modalidade === "mao_de_obra" ? "bg-blue-500/10 text-blue-600" : "bg-purple-500/10 text-purple-600"}\`}>
+                          <span className={`px-2 py-1 rounded-full text-[10px] font-medium uppercase tracking-wider ${s.modalidade === "mao_de_obra" ? "bg-blue-500/10 text-blue-600" : "bg-purple-500/10 text-purple-600"}`}>
                             {s.modalidade === "mao_de_obra" ? "Mão de Obra" : "C/ Material"}
                           </span>
                         </td>
