@@ -22,6 +22,7 @@ export default function Criador() {
   const [imagemGerada, setImagemGerada] = useState<string | null>(null);
   const [descricao, setDescricao] = useState<string | null>(null);
   const [telefoneWhatsApp, setTelefoneWhatsApp] = useState("");
+  const [whatsAppLinkManual, setWhatsAppLinkManual] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,26 +95,43 @@ export default function Criador() {
     const numero = telefoneWhatsApp.replace(/\D/g, "");
     const numeroFormatado = numero.startsWith("55") ? numero : `55${numero}`;
 
+    if (numeroFormatado.length < 12 || numeroFormatado.length > 13) {
+      toast.error("Número inválido. Use DDD + número (ex: 55 11 99999-9999)");
+      return;
+    }
+
     const mensagem = encodeURIComponent(
       `✨ Olha a criação que fiz para você!\n\n👗 ${comando}\n\n📎 A imagem da peça está em anexo. O que achou?`
     );
 
-    const isMobile = /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
-    const whatsappUrl = isMobile
-      ? `https://wa.me/${numeroFormatado}?text=${mensagem}`
-      : `https://web.whatsapp.com/send?phone=${numeroFormatado}&text=${mensagem}`;
+    const whatsappUrl = `https://wa.me/${numeroFormatado}?text=${mensagem}`;
+    setWhatsAppLinkManual(whatsappUrl);
 
-    // Use native anchor navigation to avoid popup/iframe blockers
-    const link = document.createElement("a");
-    link.href = whatsappUrl;
-    link.target = "_blank";
-    link.rel = "noopener noreferrer";
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
+    const isMobile = /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
+
+    if (isMobile) {
+      window.location.href = `whatsapp://send?phone=${numeroFormatado}&text=${mensagem}`;
+      setTimeout(() => {
+        const link = document.createElement("a");
+        link.href = whatsappUrl;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      }, 300);
+    } else {
+      const link = document.createElement("a");
+      link.href = whatsappUrl;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    }
 
     setTimeout(() => baixarImagem(), 500);
-    toast.success("Tentando abrir o WhatsApp em nova aba. A imagem foi baixada para anexar.");
+    toast.success("Se não abrir automaticamente, use o link manual abaixo.");
   };
 
   return (
@@ -256,6 +274,17 @@ export default function Criador() {
                           <MessageCircle size={14} className="mr-1" /> Enviar
                         </Button>
                       </div>
+
+                      {whatsAppLinkManual && (
+                        <a
+                          href={whatsAppLinkManual}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex mt-2 text-xs text-accent underline underline-offset-4"
+                        >
+                          Se não abrir automaticamente, toque aqui para abrir o WhatsApp
+                        </a>
+                      )}
                     </div>
                   </div>
                 </div>
