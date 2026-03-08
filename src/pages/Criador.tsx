@@ -84,54 +84,6 @@ export default function Criador() {
     link.click();
   };
 
-  const enviarWhatsApp = () => {
-    if (!telefoneWhatsApp) {
-      toast.error("Digite o número do WhatsApp do cliente");
-      return;
-    }
-
-    const numero = telefoneWhatsApp.replace(/\D/g, "");
-    const numeroFormatado = numero.startsWith("55") ? numero : `55${numero}`;
-
-    if (numeroFormatado.length < 12 || numeroFormatado.length > 13) {
-      toast.error("Número inválido. Use DDD + número (ex: 55 11 99999-9999)");
-      return;
-    }
-
-    const imagemLink = publicImageUrl ? `\n\n📸 Veja a imagem: ${publicImageUrl}` : "";
-    const mensagem = encodeURIComponent(
-      `✨ Olha a criação que fiz para você!\n\n👗 ${comando}${imagemLink}\n\nO que achou?`
-    );
-
-    const whatsappUrl = `https://wa.me/${numeroFormatado}?text=${mensagem}`;
-    setWhatsAppLinkManual(whatsappUrl);
-
-    const isMobile = /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
-
-    if (isMobile) {
-      window.location.href = `whatsapp://send?phone=${numeroFormatado}&text=${mensagem}`;
-      setTimeout(() => {
-        const link = document.createElement("a");
-        link.href = whatsappUrl;
-        link.target = "_blank";
-        link.rel = "noopener noreferrer";
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-      }, 300);
-    } else {
-      const link = document.createElement("a");
-      link.href = whatsappUrl;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    }
-
-    toast.success("WhatsApp aberto! A imagem vai como link na mensagem.");
-  };
-
   return (
     <AppLayout>
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
