@@ -27,9 +27,10 @@ const cursos = [
     destaque: true,
   },
   {
-    titulo: "Alfaiataria Feminina",
-    desc: "Domine a arte da alfaiataria feminina. Blazers, coletes, calças de alfaiataria com acabamento impecável.",
-    emoji: "🧥",
+    titulo: "Assistente IA – Costureira Estrela de Sucesso ⭐🧵",
+    desc: "Sua secretária digital que trabalha 24h, sem cobrar salário e sem fazer cara feia! A IA Costureira complementa o app, tira dúvidas sobre costura, tecidos, preços e acabamentos. Apoio, direção e incentivo diário para quem transformou a costura em fonte de renda. Porque quem aprende, não depende!",
+    emoji: "🤖",
+    destaque: true,
   },
   {
     titulo: "Camisa Feminina",
