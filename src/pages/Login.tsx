@@ -1,4 +1,5 @@
 import { useState } from "react";
+import qrcodeImg from "@/assets/qrcode.png";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -101,6 +102,11 @@ export default function Login() {
             </button>
           </p>
         </form>
+
+        <div className="mt-6 flex flex-col items-center gap-2">
+          <p className="text-primary-foreground/60 text-xs text-center">📱 Escaneie para acessar no celular</p>
+          <img src={qrcodeImg} alt="QR Code para acessar o app" className="w-28 h-28 rounded-lg bg-white p-1" />
+        </div>
       </motion.div>
     </div>
   );
