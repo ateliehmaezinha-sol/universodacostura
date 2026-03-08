@@ -2,42 +2,78 @@ import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
-import { Camera, Upload } from "lucide-react";
+import { Camera, Upload, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
-const tecidosDB: Record<string, { composicao: string; caimento: string; elasticidade: string; dificuldade: string; roupas: string; forro: string; agulha: string; linha: string }> = {
-  "Crepe": { composicao: "100% Poliéster", caimento: "Fluido", elasticidade: "Baixa", dificuldade: "Fácil", roupas: "Vestidos, blusas, saias", forro: "Dispensável na maioria", agulha: "Ponta fina 70/80", linha: "Poliéster" },
-  "Viscose": { composicao: "Fibra natural regenerada", caimento: "Muito fluido", elasticidade: "Baixa", dificuldade: "Médio", roupas: "Vestidos, camisas", forro: "Opcional", agulha: "Universal 70/80", linha: "Poliéster" },
-  "Cetim": { composicao: "Poliéster/Seda", caimento: "Fluido e brilhante", elasticidade: "Baixa", dificuldade: "Avançado", roupas: "Festas, lingerie", forro: "Dispensável", agulha: "Microtex 60/70", linha: "Poliéster fina" },
-  "Malha": { composicao: "Algodão/Elastano", caimento: "Justo ao corpo", elasticidade: "Alta", dificuldade: "Fácil", roupas: "Camisetas, vestidos casuais", forro: "Dispensável", agulha: "Ponta bola 70/80", linha: "Poliéster texturizada" },
-};
+interface FabricInfo {
+  nome: string;
+  composicao: string;
+  caimento: string;
+  elasticidade: string;
+  dificuldade: string;
+  roupas: string;
+  forro: string;
+  agulha: string;
+  linha: string;
+  confianca?: string;
+  observacoes?: string;
+}
 
 export default function Identificador() {
   const [imagem, setImagem] = useState<string | null>(null);
-  const [resultado, setResultado] = useState<string | null>(null);
+  const [resultado, setResultado] = useState<FabricInfo | null>(null);
+  const [loading, setLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const identificarTecido = async (imageBase64: string) => {
+    setLoading(true);
+    setResultado(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("identify-fabric", {
+        body: { imageBase64 },
+      });
+
+      if (error) {
+        throw new Error(error.message || "Erro ao identificar tecido");
+      }
+
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
+      setResultado(data as FabricInfo);
+      toast.success(`Tecido identificado: ${data.nome}`);
+    } catch (err: any) {
+      console.error("Erro:", err);
+      toast.error(err.message || "Não foi possível identificar o tecido. Tente outra foto.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error("Imagem muito grande. Máximo 10MB.");
+        return;
+      }
       const reader = new FileReader();
       reader.onload = () => {
-        setImagem(reader.result as string);
-        // Simulated identification
-        const nomes = Object.keys(tecidosDB);
-        const random = nomes[Math.floor(Math.random() * nomes.length)];
-        setResultado(random);
+        const base64 = reader.result as string;
+        setImagem(base64);
+        identificarTecido(base64);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const info = resultado ? tecidosDB[resultado] : null;
-
   return (
     <AppLayout>
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-3xl font-display font-bold mb-2">📸 Identificador de Tecidos</h1>
-        <p className="text-muted-foreground mb-8">Envie uma foto e descubra qual é o tecido</p>
+        <p className="text-muted-foreground mb-8">Envie uma foto e descubra qual é o tecido com IA</p>
 
         <div className="grid md:grid-cols-2 gap-8">
           <div className="space-y-4">
@@ -52,6 +88,14 @@ export default function Identificador() {
                 >
                   Trocar foto
                 </button>
+                {loading && (
+                  <div className="absolute inset-0 bg-background/60 flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-2">
+                      <Loader2 className="animate-spin text-accent" size={36} />
+                      <span className="text-sm font-medium text-foreground">Analisando tecido...</span>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <button
@@ -70,33 +114,55 @@ export default function Identificador() {
               </Button>
             )}
 
+            {imagem && !loading && (
+              <Button onClick={() => identificarTecido(imagem)} className="w-full h-12 bg-accent text-accent-foreground hover:bg-gold-dark rounded-xl">
+                <Camera size={18} className="mr-2" /> Identificar Novamente
+              </Button>
+            )}
+
             <p className="text-xs text-muted-foreground text-center">
-              💡 Para resultados futuros com IA, conecte o Lovable Cloud
+              🤖 Identificação por IA — quanto melhor a foto, mais preciso o resultado
             </p>
           </div>
 
-          {info && resultado && (
+          {resultado && (
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
               <div className="bg-accent/10 rounded-2xl p-6 border border-accent/20">
                 <p className="text-sm text-accent font-medium">Tecido identificado</p>
-                <h3 className="text-3xl font-display font-bold mt-1">{resultado}</h3>
+                <h3 className="text-3xl font-display font-bold mt-1">{resultado.nome}</h3>
+                {resultado.confianca && (
+                  <span className={`inline-block mt-2 text-xs px-2 py-1 rounded-full ${
+                    resultado.confianca === "Alta" ? "bg-green-500/20 text-green-400" :
+                    resultado.confianca === "Média" ? "bg-yellow-500/20 text-yellow-400" :
+                    "bg-red-500/20 text-red-400"
+                  }`}>
+                    Confiança: {resultado.confianca}
+                  </span>
+                )}
               </div>
 
               <div className="bg-card border border-border rounded-2xl p-6 space-y-3">
                 <h4 className="font-display font-semibold mb-2">Características</h4>
-                <p className="text-sm"><span className="text-muted-foreground">Composição:</span> {info.composicao}</p>
-                <p className="text-sm"><span className="text-muted-foreground">Caimento:</span> {info.caimento}</p>
-                <p className="text-sm"><span className="text-muted-foreground">Elasticidade:</span> {info.elasticidade}</p>
-                <p className="text-sm"><span className="text-muted-foreground">Dificuldade:</span> {info.dificuldade}</p>
+                <p className="text-sm"><span className="text-muted-foreground">Composição:</span> {resultado.composicao}</p>
+                <p className="text-sm"><span className="text-muted-foreground">Caimento:</span> {resultado.caimento}</p>
+                <p className="text-sm"><span className="text-muted-foreground">Elasticidade:</span> {resultado.elasticidade}</p>
+                <p className="text-sm"><span className="text-muted-foreground">Dificuldade:</span> {resultado.dificuldade}</p>
               </div>
 
               <div className="bg-card border border-border rounded-2xl p-6 space-y-3">
                 <h4 className="font-display font-semibold mb-2">Recomendações</h4>
-                <p className="text-sm"><span className="text-muted-foreground">Roupas ideais:</span> {info.roupas}</p>
-                <p className="text-sm"><span className="text-muted-foreground">Forro:</span> {info.forro}</p>
-                <p className="text-sm"><span className="text-muted-foreground">Agulha:</span> {info.agulha}</p>
-                <p className="text-sm"><span className="text-muted-foreground">Linha:</span> {info.linha}</p>
+                <p className="text-sm"><span className="text-muted-foreground">Roupas ideais:</span> {resultado.roupas}</p>
+                <p className="text-sm"><span className="text-muted-foreground">Forro:</span> {resultado.forro}</p>
+                <p className="text-sm"><span className="text-muted-foreground">Agulha:</span> {resultado.agulha}</p>
+                <p className="text-sm"><span className="text-muted-foreground">Linha:</span> {resultado.linha}</p>
               </div>
+
+              {resultado.observacoes && (
+                <div className="bg-card border border-border rounded-2xl p-6">
+                  <h4 className="font-display font-semibold mb-2">💡 Observações</h4>
+                  <p className="text-sm text-muted-foreground">{resultado.observacoes}</p>
+                </div>
+              )}
             </motion.div>
           )}
         </div>
