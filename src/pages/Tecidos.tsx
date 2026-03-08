@@ -16,6 +16,162 @@ type Tecido = {
   emoji: string;
   categoria?: string;
   modelosIndicados?: string;
+  dicasCostura?: string;
+  lavagem?: string;
+  comoCortar?: string;
+};
+
+const dicasBase: Record<string, { dicasCostura: string; lavagem: string; comoCortar: string }> = {
+  "Chiffon": {
+    dicasCostura: "Use agulha fina (nº 9/70). Costure com papel de seda por baixo para evitar que o tecido seja puxado. Prefira costuras francesas para acabamento limpo. Use linha de poliéster fina.",
+    lavagem: "Lavar à mão com sabão neutro. Não torcer. Secar à sombra estendido. Passar com ferro morno no avesso com pano protetor.",
+    comoCortar: "Prenda o tecido em papel de seda com alfinetes finos. Corte com tesoura bem afiada ou cortador rotativo. Use pesos em vez de alfinetes para não marcar."
+  },
+  "Musseline": {
+    dicasCostura: "Agulha fina nº 9/70, ponto pequeno. Costure com papel de seda. Acabamento com costura francesa ou overlock fino. Evite alfinetes grossos.",
+    lavagem: "Lavar à mão delicadamente. Não usar alvejante. Secar à sombra. Passar com ferro em temperatura baixa no avesso.",
+    comoCortar: "Estenda sobre papel de seda e corte ambos juntos. Use pesos para segurar. Cortador rotativo dá melhor resultado que tesoura."
+  },
+  "Organza": {
+    dicasCostura: "Agulha fina nº 9/70 e linha fina. Costura francesa obrigatória. Cuidado com desfiamento — aplique selante nas bordas. Teste tensão em retalho antes.",
+    lavagem: "Lavar à mão com água fria. Não torcer nem esfregar. Secar na horizontal. Passar com ferro morno, sempre com pano protetor.",
+    comoCortar: "Corte sobre papel de seda com cortador rotativo. Marque com giz de alfaiate suave. Adicione margem extra pois desfia facilmente."
+  },
+  "Tule": {
+    dicasCostura: "Use agulha universal fina. Ponto largo para não enrugar. Para volume, corte várias camadas. Acabamento simples pois não desfia. Pode queimar bordas levemente.",
+    lavagem: "Lavar à mão ou saco de proteção na máquina (ciclo delicado). Não torcer. Secar pendurado. Passar com vapor a distância.",
+    comoCortar: "Fácil de cortar — use tesoura afiada. Pode cortar várias camadas de uma vez. Não precisa de margem extra pois não desfia."
+  },
+  "Crepe Georgette": {
+    dicasCostura: "Agulha fina nº 9/70. Costura francesa recomendada. Use papel de seda como base. Ponto médio (2-2.5mm). Pressão leve no calcador.",
+    lavagem: "Lavar à mão com sabão neutro ou lavagem a seco. Secar à sombra. Passar com ferro morno no avesso.",
+    comoCortar: "Prenda em papel de seda. Corte com cortador rotativo para precisão. Use pesos leves para não distorcer o tecido."
+  },
+  "Seda Pura": {
+    dicasCostura: "Agulha de seda nº 8/60 ou 9/70. Linha de seda ou poliéster fina. Costura francesa obrigatória. Teste sempre em retalho. Não use alfinetes que marcam.",
+    lavagem: "Lavagem a seco recomendada. Se lavar à mão: água fria, sabão neutro, não torcer. Secar à sombra na horizontal. Ferro em temperatura seda.",
+    comoCortar: "Estenda sobre papel de seda em superfície lisa. Corte com lâmina nova e afiada. Evite puxar o tecido. Marque com giz suave."
+  },
+  "Jersey de Seda": {
+    dicasCostura: "Use agulha de ponta bola (jersey) nº 70/80. Ponto elástico ou overlock. Estabilize ombros e decotes com fita de viés. Não esticar ao costurar.",
+    lavagem: "Lavar à mão ou ciclo delicado. Não torcer. Secar na horizontal para não deformar. Passar com ferro morno.",
+    comoCortar: "Cortar em camada única. Usar pesos, não alfinetes. Deixar descansar o tecido antes de cortar. Cortador rotativo ideal."
+  },
+  "Mikado": {
+    dicasCostura: "Agulha universal nº 80/90. Ponto médio. Prense as costuras abertas com ferro. Use entretela nos detalhes estruturais. Acabamento com viés ou overlock.",
+    lavagem: "Lavagem a seco recomendada. Se necessário, ferro morno no avesso com pano protetor. Não borrifar água diretamente.",
+    comoCortar: "Corte em camada única seguindo o fio do tecido. Marque com giz. Tesoura afiada. Cuidado com o brilho — corte sempre no mesmo sentido."
+  },
+  "Zibeline": {
+    dicasCostura: "Agulha nº 90/100. Ponto médio-longo. Prense costuras com ferro quente. Use entretela em áreas estruturais. Acabamento interno com viés de seda.",
+    lavagem: "Apenas lavagem a seco. Guardar pendurado em cabide acolchoado. Ferro quente no avesso com pano úmido.",
+    comoCortar: "Camada única, seguindo o fio. Tesoura de alfaiate bem afiada. Marque com giz de alfaiate. Respeite o sentido do brilho."
+  },
+  "Tafetá": {
+    dicasCostura: "Agulha fina nº 70/80. Ponto médio. Cuidado: furo de agulha é permanente. Prense costuras abertas. Use fita de viés no acabamento.",
+    lavagem: "Lavagem a seco ou à mão com cuidado. Não torcer. Ferro morno no avesso. O tafetá amassa facilmente, guarde pendurado.",
+    comoCortar: "Cortar com tesoura afiada em camada única. Marcar com giz suave (furos de alfinete são permanentes). Seguir o fio do tecido."
+  },
+  "Jacquard": {
+    dicasCostura: "Agulha nº 80/90. Ponto médio. Alinhe os padrões nas costuras. Use overlock ou zigzag nas bordas. Prense costuras abertas.",
+    lavagem: "Lavagem a seco recomendada. Se lavar, usar ciclo delicado com água fria. Ferro morno no avesso.",
+    comoCortar: "Planeje o corte para alinhar os padrões. Corte em camada única. Marque o sentido do desenho. Tesoura afiada."
+  },
+  "Brocado": {
+    dicasCostura: "Agulha nº 90. Ponto médio. Não passar alfinetes na área visível. Use forro obrigatoriamente. Acabamento com viés de seda. Cuidado com os fios metálicos.",
+    lavagem: "Apenas lavagem a seco. Guardar enrolado (não dobrar para não quebrar fios metálicos). Não passar ferro diretamente nos fios.",
+    comoCortar: "Camada única, sentido único do desenho. Use pesos em vez de alfinetes. Tesoura para tecidos pesados. Marque no avesso."
+  },
+  "Duchess (Duquesa)": {
+    dicasCostura: "Agulha nº 90/100. Ponto médio. Prense costuras com ferro quente e paninho. Estruturar com entretela pesada. Acabamento com viés de cetim.",
+    lavagem: "Apenas lavagem a seco. Guardar pendurado em cabide largo acolchoado. Ferro quente no avesso com pano úmido.",
+    comoCortar: "Camada única no sentido do fio. Tesoura de alfaiate pesada. Marque com giz no avesso. Atenção ao caimento e ao brilho."
+  },
+  "Neoprene": {
+    dicasCostura: "Agulha nº 90. Ponto longo (3mm+). Não precisa de acabamento nas bordas (não desfia). Use cola têxtil para bainhas invisíveis. Agulha de ponta bola.",
+    lavagem: "Lavar à mão com água fria e sabão neutro. Não usar secadora. Secar à sombra. Não passar ferro (pode derreter).",
+    comoCortar: "Fácil de cortar com tesoura ou cortador rotativo. Não precisa de margem de acabamento. Marque com caneta lavável."
+  },
+  "Cetim": {
+    dicasCostura: "Agulha fina nº 70/80. Costura francesa ou overlock fino. Furos de agulha são permanentes — cuidado ao alinhavar. Use presilhas em vez de alfinetes.",
+    lavagem: "Lavar à mão com água fria ou lavagem a seco. Não torcer. Secar à sombra. Ferro morno no avesso.",
+    comoCortar: "Cortar no avesso com tecido bem esticado. Usar pesos. Cortador rotativo recomendado. Atenção ao sentido do brilho — sempre cortar no mesmo sentido."
+  },
+  "Renda": {
+    dicasCostura: "Agulha fina nº 70/80. Alinhe os desenhos nas costuras. Use costura aberta e aplique à mão quando possível. Não corte os motivos — aproveite os desenhos.",
+    lavagem: "Lavar à mão com sabão neutro. Secar na horizontal. Não torcer. Ferro morno com pano protetor. Rendas delicadas: lavagem a seco.",
+    comoCortar: "Planeje o corte respeitando os motivos da renda. Corte em camada única. Use tesoura de ponta fina para recortar motivos. Marque no forro, não na renda."
+  },
+  "Crepe": {
+    dicasCostura: "Agulha universal nº 70/80. Ponto médio. Tecido fácil de trabalhar. Overlock ou zigzag para acabamento. Prense costuras com ferro morno.",
+    lavagem: "Lavar à máquina em ciclo delicado ou à mão. Secar à sombra. Ferro morno. Tecido resistente e prático.",
+    comoCortar: "Fácil de cortar. Tesoura comum bem afiada. Pode cortar em duas camadas. Seguir o fio do tecido."
+  },
+  "Veludo": {
+    dicasCostura: "Agulha nº 80/90. Costurar no sentido do pelo. Use calcador de veludo ou teflon. Alfinetes apenas na margem de costura. Não passar ferro diretamente.",
+    lavagem: "Lavagem a seco recomendada. Se lavar: à mão, água fria. Secar pendurado ao avesso. Vapor a distância para alinhar o pelo.",
+    comoCortar: "Cortar em camada única, todas as peças no mesmo sentido do pelo. Marcar no avesso. Usar pesos. Tesoura afiada ou cortador rotativo."
+  },
+  "Lurex/Glitter": {
+    dicasCostura: "Agulha nº 80. Ponto médio. Cuidado: fios metálicos podem quebrar agulha — tenha reservas. Acabamento com overlock. Use forro para conforto.",
+    lavagem: "Lavar à mão com água fria, do avesso. Não torcer. Secar à sombra. Ferro morno no avesso com pano protetor.",
+    comoCortar: "Cortar com tesoura afiada (pode cegar a lâmina). Marcar no avesso. Usar pesos. Atenção ao brilho — corte no mesmo sentido."
+  },
+  "Paetê/Lantejoula": {
+    dicasCostura: "Retire os paetês da margem de costura antes de costurar. Agulha nº 90 resistente. Use forro obrigatoriamente. Acabamento manual nas bordas.",
+    lavagem: "Apenas lavagem a seco ou à mão com muito cuidado. Guardar do avesso. Não passar ferro nos paetês. Vapor a distância se necessário.",
+    comoCortar: "Marque no avesso. Retire paetês da linha de corte com alicate antes de cortar. Tesoura velha (danifica a lâmina). Corte em camada única."
+  },
+  "Viscose": {
+    dicasCostura: "Agulha universal nº 70/80. Ponto médio. Pré-lavar antes de cortar (encolhe). Overlock ou costura francesa. Não esticar ao costurar.",
+    lavagem: "Lavar à mão ou ciclo delicado com água fria. Encolhe se lavada em água quente. Secar à sombra na horizontal. Ferro morno.",
+    comoCortar: "Pré-lavar obrigatoriamente. Cortar sobre papel de seda. Usar pesos. Cortador rotativo recomendado pois o tecido escorrega."
+  },
+  "Linho": {
+    dicasCostura: "Agulha nº 80/90. Ponto médio. Pré-lavar (encolhe bastante). Prense costuras abertas com ferro quente. Overlock nas bordas.",
+    lavagem: "Pode lavar à máquina em ciclo normal. Ferro quente com vapor. Amassa naturalmente — é charme do linho. Amaciante opcional.",
+    comoCortar: "Pré-lavar e passar antes de cortar. Cortar seguindo o fio. Tesoura afiada. Pode cortar em duas camadas."
+  },
+  "Tricoline": {
+    dicasCostura: "Agulha universal nº 70/80. Tecido mais fácil para iniciantes. Ponto médio. Qualquer acabamento funciona. Pré-lavar recomendado.",
+    lavagem: "Lavar à máquina normalmente. Pode usar secadora. Ferro quente. Tecido muito resistente e prático.",
+    comoCortar: "O mais fácil de cortar. Pode cortar em várias camadas. Qualquer tesoura afiada. Seguir o fio do tecido. Ideal para praticar."
+  },
+  "Malha": {
+    dicasCostura: "Agulha de ponta bola obrigatória. Ponto elástico, zigzag ou overlock. Não esticar ao costurar. Estabilizar ombros e decotes com entretela.",
+    lavagem: "Lavar à máquina em ciclo delicado. Secar na horizontal (não pendurar). Ferro morno. Algumas malhas não precisam de ferro.",
+    comoCortar: "Usar cortador rotativo (tesoura puxa o tecido). Pesos em vez de alfinetes. Cortar em camada única. Deixar descansar antes de cortar."
+  },
+  "Gabardine": {
+    dicasCostura: "Agulha nº 90. Ponto médio. Prense costuras abertas com ferro quente. Use entretela no cós. Acabamento com overlock.",
+    lavagem: "Lavar à máquina em ciclo normal ou lavagem a seco. Ferro quente com vapor. Tecido resistente.",
+    comoCortar: "Fácil de cortar. Tesoura de alfaiate. Pode cortar em duas camadas. Seguir o fio. Marcar com giz."
+  },
+  "Oxford": {
+    dicasCostura: "Agulha nº 80/90. Ponto médio. Tecido fácil e estável. Qualquer acabamento. Bom para iniciantes praticarem camisas.",
+    lavagem: "Lavar à máquina normalmente. Ferro quente. Muito resistente. Seca rápido.",
+    comoCortar: "Muito fácil de cortar. Qualquer método. Pode cortar em várias camadas. Não escorrega."
+  },
+  "Moletom": {
+    dicasCostura: "Agulha de ponta bola nº 90. Ponto elástico ou overlock. Linha de poliéster. Estabilizar costuras dos ombros. Calcador de transporte ajuda.",
+    lavagem: "Lavar à máquina do avesso em água fria/morna. Secar à sombra ou secadora em temperatura baixa. Não usar ferro quente no felpado.",
+    comoCortar: "Cortador rotativo recomendado. Cortar em camada única (é grosso). Pesos para segurar. Cuidado com o felpado — cortar pelo lado liso."
+  },
+  "Jeans/Denim": {
+    dicasCostura: "Agulha de jeans nº 90/100. Ponto longo (3mm). Use linha resistente. Agulha dupla para bainhas. Martele costuras grossas antes de costurar.",
+    lavagem: "Lavar à máquina do avesso em água fria (preserva cor). Primeira lavagem separada. Ferro quente com vapor.",
+    comoCortar: "Tesoura de alfaiate pesada ou cortador rotativo com lâmina nova. Cortar em camada única para jeans pesado. Marcar com giz."
+  },
+  "Suede": {
+    dicasCostura: "Agulha nº 80/90. Costurar no sentido do pelo. Use calcador de teflon. Não desmanchar costuras (ficam marcas). Teste antes em retalho.",
+    lavagem: "Lavagem a seco recomendada. Limpar manchas com escova macia. Não molhar. Vapor a distância para alinhar o pelo.",
+    comoCortar: "Cortar em camada única, mesmo sentido do pelo. Usar pesos. Marcar no avesso com caneta. Tesoura afiada."
+  },
+  "Alfaiataria": {
+    dicasCostura: "Agulha nº 80/90. Ponto médio. Usar entretela em lapelas, golas e cós. Prense cada costura aberta. Forro recomendado. Acabamento profissional com viés.",
+    lavagem: "Lavagem a seco recomendada para manter estrutura. Ferro quente com vapor e pano protetor. Guardar em cabide.",
+    comoCortar: "Cortar seguindo o fio com precisão. Marcar com giz de alfaiate. Tesoura afiada. Pode cortar em duas camadas. Respeitar margens de costura."
+  },
 };
 
 const tecidos: Tecido[] = [
