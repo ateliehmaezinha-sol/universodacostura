@@ -21,10 +21,27 @@ const tecidos = [
 
 export default function Tecidos() {
   const [busca, setBusca] = useState("");
-  const filtrados = tecidos.filter((t) =>
-    t.nome.toLowerCase().includes(busca.toLowerCase()) ||
-    t.roupas.toLowerCase().includes(busca.toLowerCase())
-  );
+  
+  const normalizeText = (text: string) => {
+    return text
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, ""); // Remove acentos
+  };
+  
+  const buscaNormalizada = normalizeText(busca.trim());
+  
+  const filtrados = tecidos.filter((t) => {
+    if (!buscaNormalizada) return true;
+    
+    return (
+      normalizeText(t.nome).includes(buscaNormalizada) ||
+      normalizeText(t.roupas).includes(buscaNormalizada) ||
+      normalizeText(t.composicao).includes(buscaNormalizada) ||
+      normalizeText(t.caimento).includes(buscaNormalizada) ||
+      normalizeText(t.dificuldade).includes(buscaNormalizada)
+    );
+  });
 
   return (
     <AppLayout>
