@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -102,8 +103,40 @@ The image should be photorealistic and high quality.`,
       );
     }
 
+    // Upload base64 image to storage for public URL (for WhatsApp sharing)
+    let publicImageUrl: string | null = null;
+    try {
+      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+      const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+
+      // Decode base64 data URL to binary
+      const base64Data = imageUrl.replace(/^data:image\/\w+;base64,/, "");
+      const binaryData = Uint8Array.from(atob(base64Data), (c) => c.charCodeAt(0));
+      
+      const fileName = `criacao-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.png`;
+
+      const { error: uploadError } = await supabaseAdmin.storage
+        .from("generated-images")
+        .upload(fileName, binaryData, {
+          contentType: "image/png",
+          upsert: false,
+        });
+
+      if (!uploadError) {
+        const { data: urlData } = supabaseAdmin.storage
+          .from("generated-images")
+          .getPublicUrl(fileName);
+        publicImageUrl = urlData.publicUrl;
+      } else {
+        console.error("Storage upload error:", uploadError);
+      }
+    } catch (uploadErr) {
+      console.error("Failed to upload image to storage:", uploadErr);
+    }
+
     return new Response(
-      JSON.stringify({ imageUrl, description: textContent }),
+      JSON.stringify({ imageUrl, publicImageUrl, description: textContent }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
