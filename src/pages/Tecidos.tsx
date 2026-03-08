@@ -798,6 +798,7 @@ export default function Tecidos() {
           {filtrados.map((t, i) => {
             const dicas = dicasBase[t.nome];
             const isOpen = expandido === t.nome;
+            const isInComparison = comparar[0] === t.nome || comparar[1] === t.nome;
             return (
             <motion.div
               key={t.nome}
@@ -836,17 +837,46 @@ export default function Tecidos() {
                 </div>
               </div>
 
-              {/* Botão expandir */}
-              {dicas && (
+              {/* Botões de ação */}
+              <div className="mt-3 flex gap-2">
                 <button
-                  onClick={() => setExpandido(isOpen ? null : t.nome)}
-                  className="mt-3 flex items-center justify-center gap-2 w-full py-2 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-all border border-border/50"
+                  onClick={() => {
+                    if (isInComparison) {
+                      setComparar([
+                        comparar[0] === t.nome ? null : comparar[0],
+                        comparar[1] === t.nome ? null : comparar[1],
+                      ]);
+                    } else if (!comparar[0]) {
+                      setComparar([t.nome, comparar[1]]);
+                      setComparadorAberto(true);
+                    } else if (!comparar[1]) {
+                      setComparar([comparar[0], t.nome]);
+                      setComparadorAberto(true);
+                    } else {
+                      setComparar([comparar[0], t.nome]);
+                      setComparadorAberto(true);
+                    }
+                  }}
+                  className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-medium transition-all border ${
+                    isInComparison
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "text-muted-foreground hover:text-foreground hover:bg-accent/50 border-border/50"
+                  }`}
                 >
-                  <Scissors size={14} />
-                  {isOpen ? "Ocultar dicas" : "Dicas de costura, corte e lavagem"}
-                  <ChevronDown size={14} className={`transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                  {isInComparison ? <Check size={12} /> : <GitCompareArrows size={12} />}
+                  {isInComparison ? "Selecionado" : "Comparar"}
                 </button>
-              )}
+                {dicas && (
+                  <button
+                    onClick={() => setExpandido(isOpen ? null : t.nome)}
+                    className="flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-all border border-border/50"
+                  >
+                    <Scissors size={12} />
+                    {isOpen ? "Ocultar dicas" : "Dicas de costura, corte e lavagem"}
+                    <ChevronDown size={12} className={`transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                  </button>
+                )}
+              </div>
 
               <AnimatePresence>
                 {isOpen && dicas && (
