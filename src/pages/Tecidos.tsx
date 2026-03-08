@@ -281,6 +281,20 @@ export default function Tecidos() {
   const [guiaForrosAberto, setGuiaForrosAberto] = useState(false);
   const [comparar, setComparar] = useState<[string | null, string | null]>([null, null]);
   const [comparadorAberto, setComparadorAberto] = useState(false);
+  const [favoritos, setFavoritos] = useState<string[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem("tecidos-favoritos") || "[]");
+    } catch { return []; }
+  });
+  const [mostrarFavoritos, setMostrarFavoritos] = useState(false);
+
+  const toggleFavorito = (nome: string) => {
+    setFavoritos(prev => {
+      const next = prev.includes(nome) ? prev.filter(f => f !== nome) : [...prev, nome];
+      localStorage.setItem("tecidos-favoritos", JSON.stringify(next));
+      return next;
+    });
+  };
 
   const tecido1 = tecidos.find(t => t.nome === comparar[0]);
   const tecido2 = tecidos.find(t => t.nome === comparar[1]);
