@@ -134,8 +134,7 @@ export default function Criador() {
       link.remove();
     }
 
-    setTimeout(() => baixarImagem(), 500);
-    toast.success("Se não abrir automaticamente, use o link manual abaixo.");
+    toast.success("WhatsApp aberto! A imagem vai como link na mensagem.");
   };
 
   return (
