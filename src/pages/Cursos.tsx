@@ -36,7 +36,7 @@ const cursos = [
     desc: "Sua secretária digital que trabalha 24h, sem cobrar salário e sem fazer cara feia! A IA Costureira complementa o app, tira dúvidas sobre costura, tecidos, preços e acabamentos. Apoio, direção e incentivo diário para quem transformou a costura em fonte de renda. Porque quem aprende, não depende!",
     emoji: "🤖",
     destaque: true,
-    link: "",
+    link: "https://go.hotmart.com/Y103690164U",
   },
   {
     titulo: "Camisa Feminina – 100% Online",
