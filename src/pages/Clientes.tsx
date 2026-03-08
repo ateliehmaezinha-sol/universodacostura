@@ -2,39 +2,61 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Plus, User, Trash2 } from "lucide-react";
-
-interface Cliente {
-  id: string;
-  nome: string;
-  telefone: string;
-  cidade: string;
-  busto: string;
-  cintura: string;
-  quadril: string;
-  historico: string[];
-}
+import { Plus, User } from "lucide-react";
+import { Cliente } from "@/components/clientes/types";
+import ClienteForm from "@/components/clientes/ClienteForm";
+import ClienteCard from "@/components/clientes/ClienteCard";
 
 export default function Clientes() {
   const [clientes, setClientes] = useState<Cliente[]>(() => {
-    const saved = localStorage.getItem("atelie_clientes");
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem("atelie_clientes_v2");
+      if (saved) return JSON.parse(saved);
+      // Migrar dados antigos se existirem
+      const old = localStorage.getItem("atelie_clientes");
+      if (old) {
+        const oldClientes = JSON.parse(old);
+        const migrated = oldClientes.map((c: any) => ({
+          ...c,
+          tipoMedida: "sob_medida",
+          tamanhoIndustrial: "",
+          medidas: {
+            busto: c.busto || "",
+            cintura: c.cintura || "",
+            quadril: c.quadril || "",
+            ombroAOmbro: "",
+            comprimentoFrente: "",
+            comprimentoCostas: "",
+            larguraCostas: "",
+            alturaBusto: "",
+            distanciaBustos: "",
+            circunferenciaBraco: "",
+            comprimentoBraco: "",
+            circunferenciaPunho: "",
+            comprimentoSaia: "",
+            comprimentoCalca: "",
+            circunferenciaCoxa: "",
+            comprimentoTotal: "",
+          },
+          historico: c.historico || [],
+        }));
+        localStorage.setItem("atelie_clientes_v2", JSON.stringify(migrated));
+        return migrated;
+      }
+      return [];
+    } catch {
+      return [];
+    }
   });
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ nome: "", telefone: "", cidade: "", busto: "", cintura: "", quadril: "" });
 
   const salvar = (list: Cliente[]) => {
     setClientes(list);
-    localStorage.setItem("atelie_clientes", JSON.stringify(list));
+    localStorage.setItem("atelie_clientes_v2", JSON.stringify(list));
   };
 
-  const addCliente = (e: React.FormEvent) => {
-    e.preventDefault();
-    const novo: Cliente = { id: Date.now().toString(), ...form, historico: [] };
-    salvar([...clientes, novo]);
-    setForm({ nome: "", telefone: "", cidade: "", busto: "", cintura: "", quadril: "" });
+  const addCliente = (cliente: Cliente) => {
+    salvar([...clientes, cliente]);
     setShowForm(false);
   };
 
@@ -46,51 +68,18 @@ export default function Clientes() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-display font-bold">👥 Clientes</h1>
-            <p className="text-muted-foreground">Gerencie seus clientes e medidas</p>
+            <p className="text-muted-foreground">Gerencie seus clientes e medidas completas</p>
           </div>
-          <Button onClick={() => setShowForm(!showForm)} className="bg-accent text-accent-foreground hover:bg-gold-dark rounded-xl">
+          <Button
+            onClick={() => setShowForm(!showForm)}
+            className="bg-accent text-accent-foreground hover:bg-gold-dark rounded-xl"
+          >
             <Plus size={18} className="mr-2" /> Nova Cliente
           </Button>
         </div>
 
         {showForm && (
-          <motion.form
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            onSubmit={addCliente}
-            className="bg-card border border-border rounded-2xl p-6 mb-6 space-y-4"
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Nome</Label>
-                <Input placeholder="Nome da cliente" value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} required />
-              </div>
-              <div className="space-y-2">
-                <Label>Telefone</Label>
-                <Input placeholder="(00) 00000-0000" value={form.telefone} onChange={(e) => setForm({ ...form, telefone: e.target.value })} />
-              </div>
-              <div className="space-y-2">
-                <Label>Cidade</Label>
-                <Input placeholder="Cidade" value={form.cidade} onChange={(e) => setForm({ ...form, cidade: e.target.value })} />
-              </div>
-            </div>
-            <h4 className="font-display font-semibold text-sm pt-2">Medidas Corporais (cm)</h4>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label>Busto</Label>
-                <Input placeholder="cm" value={form.busto} onChange={(e) => setForm({ ...form, busto: e.target.value })} />
-              </div>
-              <div className="space-y-2">
-                <Label>Cintura</Label>
-                <Input placeholder="cm" value={form.cintura} onChange={(e) => setForm({ ...form, cintura: e.target.value })} />
-              </div>
-              <div className="space-y-2">
-                <Label>Quadril</Label>
-                <Input placeholder="cm" value={form.quadril} onChange={(e) => setForm({ ...form, quadril: e.target.value })} />
-              </div>
-            </div>
-            <Button type="submit" className="bg-accent text-accent-foreground hover:bg-gold-dark rounded-xl">Salvar Cliente</Button>
-          </motion.form>
+          <ClienteForm onSave={addCliente} onCancel={() => setShowForm(false)} />
         )}
 
         {clientes.length === 0 ? (
@@ -101,20 +90,7 @@ export default function Clientes() {
         ) : (
           <div className="grid gap-4">
             {clientes.map((c) => (
-              <div key={c.id} className="bg-card border border-border rounded-2xl p-5 flex items-center justify-between">
-                <div>
-                  <h3 className="font-semibold text-lg">{c.nome}</h3>
-                  <p className="text-sm text-muted-foreground">{c.telefone} • {c.cidade}</p>
-                  {(c.busto || c.cintura || c.quadril) && (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Medidas: B{c.busto} / C{c.cintura} / Q{c.quadril}
-                    </p>
-                  )}
-                </div>
-                <button onClick={() => remover(c.id)} className="text-destructive/50 hover:text-destructive transition-colors">
-                  <Trash2 size={18} />
-                </button>
-              </div>
+              <ClienteCard key={c.id} cliente={c} onRemove={remover} />
             ))}
           </div>
         )}
