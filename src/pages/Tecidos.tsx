@@ -327,6 +327,222 @@ export default function Tecidos() {
           </div>
         </div>
 
+        {/* Guia de Forros */}
+        <div className="mb-6">
+          <button
+            onClick={() => setGuiaForrosAberto(!guiaForrosAberto)}
+            className="w-full flex items-center justify-between gap-3 px-5 py-4 rounded-2xl bg-gradient-to-r from-primary/10 to-accent/20 border border-primary/20 hover:border-primary/40 transition-all group"
+          >
+            <div className="flex items-center gap-3">
+              <BookOpen size={20} className="text-primary" />
+              <div className="text-left">
+                <span className="font-display font-semibold text-lg">📖 Guia Completo de Forros</span>
+                <p className="text-xs text-muted-foreground">Bemberg, toque de seda, charmeuse, acetato e mais — tudo explicado</p>
+              </div>
+            </div>
+            {guiaForrosAberto ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+          </button>
+
+          <AnimatePresence>
+            {guiaForrosAberto && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="overflow-hidden"
+              >
+                <div className="mt-4 bg-card border border-border rounded-2xl p-5">
+                  <Tabs defaultValue="bemberg" className="w-full">
+                    <TabsList className="flex flex-wrap h-auto gap-1 bg-muted/50 p-1.5 rounded-xl mb-4">
+                      <TabsTrigger value="bemberg" className="text-xs rounded-lg">Bemberg</TabsTrigger>
+                      <TabsTrigger value="toque-seda" className="text-xs rounded-lg">Toque de Seda</TabsTrigger>
+                      <TabsTrigger value="charmeuse" className="text-xs rounded-lg">Charmeuse</TabsTrigger>
+                      <TabsTrigger value="acetato" className="text-xs rounded-lg">Acetato</TabsTrigger>
+                      <TabsTrigger value="tafeta" className="text-xs rounded-lg">Tafetá</TabsTrigger>
+                      <TabsTrigger value="malha-fria" className="text-xs rounded-lg">Malha Fria</TabsTrigger>
+                      <TabsTrigger value="jersey" className="text-xs rounded-lg">Jersey</TabsTrigger>
+                      <TabsTrigger value="algodao" className="text-xs rounded-lg">Algodão</TabsTrigger>
+                      <TabsTrigger value="organza" className="text-xs rounded-lg">Organza de Seda</TabsTrigger>
+                      <TabsTrigger value="viscose" className="text-xs rounded-lg">Viscose</TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="bemberg">
+                      <ForroCard
+                        nome="Forro Bemberg (Cupro)"
+                        emoji="🏆"
+                        composicao="Fibra de cupro (celulose regenerada)"
+                        toque="Sedoso, fresco e muito confortável na pele"
+                        peso="Leve a médio"
+                        respirabilidade="Excelente — absorve umidade e mantém frescor"
+                        transparencia="Levemente translúcido"
+                        preco="Alto (forro premium)"
+                        indicado="Alfaiataria fina, vestidos de festa estruturados (Mikado, Zibeline, Duchess), blazers de alta qualidade, casacos"
+                        naoIndicado="Peças casuais de baixo custo, roupas que não precisam de forro"
+                        cuidados="Lavagem a seco recomendada. Ferro morno no avesso. Não usar alvejante. Resistente ao desgaste."
+                        diferencial="Considerado o melhor forro do mercado. Antiestático natural, não gruda no corpo. Usado em alta costura e alfaiataria de luxo. Durabilidade superior."
+                      />
+                    </TabsContent>
+
+                    <TabsContent value="toque-seda">
+                      <ForroCard
+                        nome="Forro Toque de Seda"
+                        emoji="✨"
+                        composicao="Poliéster de alta qualidade com acabamento acetinado"
+                        toque="Suave e escorregadio, imita a seda"
+                        peso="Leve"
+                        respirabilidade="Moderada"
+                        transparencia="Semi-opaco"
+                        preco="Médio (melhor custo-benefício)"
+                        indicado="Vestidos de festa (todos os tipos), saias, vestidos de noiva, blusas com transparência. O forro mais versátil."
+                        naoIndicado="Peças muito estruturadas que precisam de corpo (prefira acetato ou tafetá)"
+                        cuidados="Lavar à máquina em ciclo delicado. Ferro morno. Seca rápido. Boa durabilidade."
+                        diferencial="O forro mais popular no Brasil. Excelente custo-benefício. Disponível em ampla gama de cores. Leve e confortável. Ideal para quem está começando."
+                      />
+                    </TabsContent>
+
+                    <TabsContent value="charmeuse">
+                      <ForroCard
+                        nome="Forro Charmeuse"
+                        emoji="💎"
+                        composicao="Seda pura ou poliéster com trama cetim"
+                        toque="Ultra sedoso, brilhante de um lado e fosco do outro"
+                        peso="Leve"
+                        respirabilidade="Boa (especialmente em seda pura)"
+                        transparencia="Semi-opaco com brilho"
+                        preco="Alto (seda) / Médio (poliéster)"
+                        indicado="Vestidos de festa em seda pura, peças de alta costura, slip dresses, vestidos com caimento fluido"
+                        naoIndicado="Peças casuais, roupas de alfaiataria rígida"
+                        cuidados="Seda: lavagem a seco. Poliéster: ciclo delicado. Ferro em temperatura baixa no avesso. Não torcer."
+                        diferencial="O brilho sutil da charmeuse adiciona luxo à peça. Perfeito para tecidos transparentes onde o forro fica visível. Caimento impecável."
+                      />
+                    </TabsContent>
+
+                    <TabsContent value="acetato">
+                      <ForroCard
+                        nome="Forro de Acetato"
+                        emoji="🧊"
+                        composicao="Fibra de acetato de celulose"
+                        toque="Fresco e levemente rígido"
+                        peso="Leve a médio"
+                        respirabilidade="Boa — não retém calor"
+                        transparencia="Opaco"
+                        preco="Médio a alto"
+                        indicado="Blazers, casacos, peças de alfaiataria, vestidos estruturados (Zibeline, Brocado, Duchess), calças sociais"
+                        naoIndicado="Peças muito fluidas ou vestidos de verão leves"
+                        cuidados="Lavagem a seco recomendada. Ferro em temperatura baixa (acetato derrete com calor alto!). Não usar acetona perto."
+                        diferencial="Excelente para dar estrutura leve sem peso. Antiestático. Muito usado em alfaiataria clássica. Cuidado: sensível ao calor e a produtos químicos."
+                      />
+                    </TabsContent>
+
+                    <TabsContent value="tafeta">
+                      <ForroCard
+                        nome="Forro de Tafetá"
+                        emoji="💫"
+                        composicao="Poliéster com trama tafetá (firme)"
+                        toque="Liso, levemente crocante/firme"
+                        peso="Leve a médio"
+                        respirabilidade="Baixa a moderada"
+                        transparencia="Opaco"
+                        preco="Baixo a médio"
+                        indicado="Saias rodadas que precisam de volume, vestidos de debutante, casacos, bolsas, artesanato"
+                        naoIndicado="Vestidos fluidos e leves, peças que precisam de caimento suave"
+                        cuidados="Lavar à máquina normalmente. Ferro morno. Muito resistente e durável. Amassa pouco."
+                        diferencial="Dá sustentação e volume às peças. O 'barulhinho' característico do tafetá. Ótimo para underskirts e anáguas. Opção econômica."
+                      />
+                    </TabsContent>
+
+                    <TabsContent value="malha-fria">
+                      <ForroCard
+                        nome="Forro de Malha Fria"
+                        emoji="❄️"
+                        composicao="Poliéster/Elastano com toque gelado"
+                        toque="Frio, elástico e confortável"
+                        peso="Leve"
+                        respirabilidade="Boa — sensação térmica fria"
+                        transparencia="Semi-opaco"
+                        preco="Baixo a médio"
+                        indicado="Vestidos justos (sereia, tubinho), peças com elasticidade, roupas de verão, vestidos com renda, lurex e paetê (protege a pele)"
+                        naoIndicado="Peças muito estruturadas ou de alfaiataria"
+                        cuidados="Lavar à máquina em ciclo delicado. Não usar secadora (pode encolher). Não precisa passar."
+                        diferencial="Acompanha o movimento do corpo graças à elasticidade. Conforto térmico excepcional. Ideal para climas quentes. Protege a pele de tecidos ásperos."
+                      />
+                    </TabsContent>
+
+                    <TabsContent value="jersey">
+                      <ForroCard
+                        nome="Forro de Jersey Fino"
+                        emoji="🩱"
+                        composicao="Poliéster/Viscose/Elastano"
+                        toque="Macio, elástico e fluido"
+                        peso="Leve"
+                        respirabilidade="Boa"
+                        transparencia="Semi-opaco a opaco"
+                        preco="Baixo a médio"
+                        indicado="Vestidos de malha, peças justas ao corpo, vestidos com fenda, roupas de jersey de seda"
+                        naoIndicado="Peças rígidas de alfaiataria, saias volumosas"
+                        cuidados="Lavar à máquina normalmente. Secar na horizontal. Não precisa passar."
+                        diferencial="Extremamente confortável e flexível. Não restringe movimentos. Ideal para vestidos que precisam de caimento justo com conforto."
+                      />
+                    </TabsContent>
+
+                    <TabsContent value="algodao">
+                      <ForroCard
+                        nome="Forro de Algodão"
+                        emoji="☁️"
+                        composicao="100% algodão fino"
+                        toque="Natural, macio e respirável"
+                        peso="Leve"
+                        respirabilidade="Excelente — fibra natural"
+                        transparencia="Opaco (depende da gramatura)"
+                        preco="Baixo"
+                        indicado="Jaquetas jeans, casacos casuais, roupas infantis, peças alérgicas (hipoalergênico)"
+                        naoIndicado="Vestidos de festa (não tem brilho/suavidade), peças que precisam deslizar"
+                        cuidados="Lavar à máquina normalmente. Ferro quente. Pré-lavar antes de usar (pode encolher)."
+                        diferencial="O mais confortável para peles sensíveis. Hipoalergênico. Econômico e fácil de encontrar. Ideal para roupas infantis e casuais."
+                      />
+                    </TabsContent>
+
+                    <TabsContent value="organza">
+                      <ForroCard
+                        nome="Forro de Organza de Seda"
+                        emoji="🦢"
+                        composicao="Seda pura ou poliéster fino"
+                        toque="Leve, crocante e transparente"
+                        peso="Ultra leve"
+                        respirabilidade="Excelente"
+                        transparencia="Transparente"
+                        preco="Alto (seda) / Médio (poliéster)"
+                        indicado="Alta costura em seda pura — usado como entreforro para dar leve estrutura sem peso. Vestidos de noiva."
+                        naoIndicado="Não funciona como forro principal (é transparente). Peças que precisam de cobertura total."
+                        cuidados="Lavagem a seco. Ferro morno com pano protetor. Muito delicado."
+                        diferencial="Usado em alta costura como camada intermediária (entreforro). Dá estrutura sutil sem adicionar peso. Combinado com outro forro opaco cria efeito premium."
+                      />
+                    </TabsContent>
+
+                    <TabsContent value="viscose">
+                      <ForroCard
+                        nome="Forro de Viscose"
+                        emoji="🌿"
+                        composicao="Fibra de viscose (celulose regenerada)"
+                        toque="Suave, fresco e natural"
+                        peso="Leve"
+                        respirabilidade="Muito boa — absorve umidade"
+                        transparencia="Semi-opaco"
+                        preco="Médio"
+                        indicado="Vestidos de verão, peças de linho, saias fluidas, roupas casuais elegantes"
+                        naoIndicado="Peças muito estruturadas, alfaiataria pesada"
+                        cuidados="Lavar à mão ou ciclo delicado. Pode encolher em água quente. Ferro morno. Secar à sombra."
+                        diferencial="Alternativa natural e sustentável ao poliéster. Caimento fluido e natural. Confortável em climas quentes. Biodegradável."
+                      />
+                    </TabsContent>
+                  </Tabs>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
         <p className="text-sm text-muted-foreground mb-4">{filtrados.length} tecido{filtrados.length !== 1 ? "s" : ""} encontrado{filtrados.length !== 1 ? "s" : ""}</p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
