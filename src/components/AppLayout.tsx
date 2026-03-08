@@ -59,7 +59,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
               className="lg:hidden fixed left-0 top-0 bottom-0 z-50 w-72 bg-primary p-6 flex flex-col"
             >
               <div className="flex items-center justify-between mb-8">
-                <span className="font-display text-xl text-primary-foreground">✨ Ateliê Mãezinha</span>
+                <span className="font-display text-xl text-primary-foreground">✨ Atelieh Mãezinha</span>
                 <button onClick={() => setSidebarOpen(false)} className="text-primary-foreground/70">
                   <X size={20} />
                 </button>
