@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, ChevronDown, Scissors, Droplets, Ruler, BookOpen, ChevronUp, GitCompareArrows, X, Check } from "lucide-react";
+import { Search, ChevronDown, Scissors, Droplets, Ruler, BookOpen, ChevronUp, GitCompareArrows, X, Check, Heart } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type Tecido = {
