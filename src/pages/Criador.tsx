@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Camera, Sparkles, Download, Loader2, RefreshCw, MessageCircle } from "lucide-react";
+import { Camera, Sparkles, Download, Loader2, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -20,10 +20,7 @@ export default function Criador() {
   const [comando, setComando] = useState("");
   const [gerando, setGerando] = useState(false);
   const [imagemGerada, setImagemGerada] = useState<string | null>(null);
-  const [publicImageUrl, setPublicImageUrl] = useState<string | null>(null);
   const [descricao, setDescricao] = useState<string | null>(null);
-  const [telefoneWhatsApp, setTelefoneWhatsApp] = useState("");
-  const [whatsAppLinkManual, setWhatsAppLinkManual] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,7 +40,6 @@ export default function Criador() {
 
     setGerando(true);
     setImagemGerada(null);
-    setPublicImageUrl(null);
     setDescricao(null);
 
     try {
@@ -67,7 +63,6 @@ export default function Criador() {
 
       if (data?.imageUrl) {
         setImagemGerada(data.imageUrl);
-        setPublicImageUrl(data.publicImageUrl || null);
         setDescricao(data.description || null);
         toast.success("Criação gerada com sucesso!");
       } else {
@@ -87,54 +82,6 @@ export default function Criador() {
     link.href = imagemGerada;
     link.download = `criacao-${Date.now()}.png`;
     link.click();
-  };
-
-  const enviarWhatsApp = () => {
-    if (!telefoneWhatsApp) {
-      toast.error("Digite o número do WhatsApp do cliente");
-      return;
-    }
-
-    const numero = telefoneWhatsApp.replace(/\D/g, "");
-    const numeroFormatado = numero.startsWith("55") ? numero : `55${numero}`;
-
-    if (numeroFormatado.length < 12 || numeroFormatado.length > 13) {
-      toast.error("Número inválido. Use DDD + número (ex: 55 11 99999-9999)");
-      return;
-    }
-
-    const imagemLink = publicImageUrl ? `\n\n📸 Veja a imagem: ${publicImageUrl}` : "";
-    const mensagem = encodeURIComponent(
-      `✨ Olha a criação que fiz para você!\n\n👗 ${comando}${imagemLink}\n\nO que achou?`
-    );
-
-    const whatsappUrl = `https://wa.me/${numeroFormatado}?text=${mensagem}`;
-    setWhatsAppLinkManual(whatsappUrl);
-
-    const isMobile = /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
-
-    if (isMobile) {
-      window.location.href = `whatsapp://send?phone=${numeroFormatado}&text=${mensagem}`;
-      setTimeout(() => {
-        const link = document.createElement("a");
-        link.href = whatsappUrl;
-        link.target = "_blank";
-        link.rel = "noopener noreferrer";
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-      }, 300);
-    } else {
-      const link = document.createElement("a");
-      link.href = whatsappUrl;
-      link.target = "_blank";
-      link.rel = "noopener noreferrer";
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    }
-
-    toast.success("WhatsApp aberto! A imagem vai como link na mensagem.");
   };
 
   return (
