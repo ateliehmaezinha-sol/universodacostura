@@ -28,7 +28,7 @@ const cursos = [
     desc: "Da modelagem ao acabamento, ensino técnicas exclusivas usando base de modelagem do padrão industrial com as Réguas LD Molde Perfeito. Aqui no Atelieh Mãezinha a cliente prova uma vez só — já ensinei muitas alunas a fazer o mesmo, e o resultado surpreende até as clientes!",
     emoji: "🧵",
     destaque: true,
-    link: "",
+    link: "https://nivelmodelagem.lovable.app/",
   },
   {
     titulo: "Assistente IA – Costureira Estrela de Sucesso ⭐🧵",
