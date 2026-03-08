@@ -85,6 +85,26 @@ export default function Criador() {
     link.click();
   };
 
+  const enviarWhatsApp = () => {
+    if (!telefoneWhatsApp) {
+      toast.error("Digite o número do WhatsApp do cliente");
+      return;
+    }
+    // Clean phone number
+    const numero = telefoneWhatsApp.replace(/\D/g, "");
+    const numeroFormatado = numero.startsWith("55") ? numero : `55${numero}`;
+    
+    // First download the image so user has it ready to attach
+    baixarImagem();
+
+    const mensagem = encodeURIComponent(
+      `✨ Olha a criação que fiz para você!\n\n👗 ${comando}\n\n📎 A imagem da peça está em anexo. O que achou?`
+    );
+    
+    window.open(`https://wa.me/${numeroFormatado}?text=${mensagem}`, "_blank");
+    toast.success("WhatsApp aberto! Anexe a imagem baixada na conversa.");
+  };
+
   return (
     <AppLayout>
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
