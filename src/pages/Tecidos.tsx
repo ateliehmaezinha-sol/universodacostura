@@ -60,10 +60,12 @@ const tecidos: Tecido[] = [
 ];
 
 const dificuldades = ["Todos", "Fácil", "Médio", "Avançado"] as const;
+const categorias = ["Todos", "Leve", "Estruturado", "Versátil"] as const;
 
 export default function Tecidos() {
   const [busca, setBusca] = useState("");
   const [filtroDificuldade, setFiltroDificuldade] = useState<string>("Todos");
+  const [filtroCategoria, setFiltroCategoria] = useState<string>("Todos");
 
   const normalizeText = (text: string) => {
     return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -73,13 +75,15 @@ export default function Tecidos() {
 
   const filtrados = tecidos.filter((t) => {
     if (filtroDificuldade !== "Todos" && t.dificuldade !== filtroDificuldade) return false;
+    if (filtroCategoria !== "Todos" && t.categoria !== filtroCategoria) return false;
     if (!buscaNormalizada) return true;
     return (
       normalizeText(t.nome).includes(buscaNormalizada) ||
       normalizeText(t.roupas).includes(buscaNormalizada) ||
       normalizeText(t.composicao).includes(buscaNormalizada) ||
       normalizeText(t.caimento).includes(buscaNormalizada) ||
-      normalizeText(t.dificuldade).includes(buscaNormalizada)
+      normalizeText(t.dificuldade).includes(buscaNormalizada) ||
+      normalizeText(t.modelosIndicados || "").includes(buscaNormalizada)
     );
   });
 
@@ -89,40 +93,80 @@ export default function Tecidos() {
     return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
   };
 
-  const getFilterStyle = (d: string) => {
+  const getFilterStyle = (d: string, isActive: boolean) => {
+    if (isActive) return "bg-primary text-primary-foreground shadow-md";
+    return "bg-muted text-muted-foreground hover:bg-accent";
+  };
+
+  const getDificuldadeFilterStyle = (d: string) => {
     const isActive = filtroDificuldade === d;
-    if (d === "Todos") return isActive ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-accent";
-    if (d === "Fácil") return isActive ? "bg-green-600 text-white" : "bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400";
-    if (d === "Médio") return isActive ? "bg-yellow-600 text-white" : "bg-yellow-100 text-yellow-700 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400";
-    return isActive ? "bg-red-600 text-white" : "bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400";
+    if (d === "Todos") return getFilterStyle(d, isActive);
+    if (d === "Fácil") return isActive ? "bg-green-600 text-white shadow-md" : "bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400";
+    if (d === "Médio") return isActive ? "bg-yellow-600 text-white shadow-md" : "bg-yellow-100 text-yellow-700 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400";
+    return isActive ? "bg-red-600 text-white shadow-md" : "bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400";
+  };
+
+  const getCategoriaStyle = (c: string) => {
+    if (c === "Leve") return "bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400";
+    if (c === "Estruturado") return "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400";
+    if (c === "Versátil") return "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400";
+    return "";
+  };
+
+  const getCategoriaFilterStyle = (c: string) => {
+    const isActive = filtroCategoria === c;
+    if (c === "Todos") return getFilterStyle(c, isActive);
+    if (c === "Leve") return isActive ? "bg-sky-600 text-white shadow-md" : "bg-sky-100 text-sky-700 hover:bg-sky-200 dark:bg-sky-900/30 dark:text-sky-400";
+    if (c === "Estruturado") return isActive ? "bg-orange-600 text-white shadow-md" : "bg-orange-100 text-orange-700 hover:bg-orange-200 dark:bg-orange-900/30 dark:text-orange-400";
+    return isActive ? "bg-purple-600 text-white shadow-md" : "bg-purple-100 text-purple-700 hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-400";
   };
 
   return (
     <AppLayout>
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-3xl font-display font-bold mb-2">📚 Biblioteca de Tecidos</h1>
-        <p className="text-muted-foreground mb-6">Consulte informações sobre diversos tecidos</p>
+        <p className="text-muted-foreground mb-6">Consulte informações sobre diversos tecidos para festa e dia a dia</p>
 
         <div className="relative mb-4">
           <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Buscar tecido ou tipo de roupa..."
+            placeholder="Buscar tecido, tipo de roupa ou modelo..."
             className="pl-11 h-12 rounded-xl bg-card"
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
           />
         </div>
 
-        <div className="flex flex-wrap gap-2 mb-8">
-          {dificuldades.map((d) => (
-            <button
-              key={d}
-              onClick={() => setFiltroDificuldade(d)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${getFilterStyle(d)}`}
-            >
-              {d === "Todos" ? "Todos" : d} {d !== "Todos" && `(${tecidos.filter((t) => t.dificuldade === d).length})`}
-            </button>
-          ))}
+        {/* Filtro por tipo de tecido */}
+        <div className="mb-3">
+          <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">Tipo de tecido</p>
+          <div className="flex flex-wrap gap-2">
+            {categorias.map((c) => (
+              <button
+                key={c}
+                onClick={() => setFiltroCategoria(c)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${getCategoriaFilterStyle(c)}`}
+              >
+                {c} {c !== "Todos" && `(${tecidos.filter((t) => t.categoria === c).length})`}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Filtro por dificuldade */}
+        <div className="mb-6">
+          <p className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">Dificuldade</p>
+          <div className="flex flex-wrap gap-2">
+            {dificuldades.map((d) => (
+              <button
+                key={d}
+                onClick={() => setFiltroDificuldade(d)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${getDificuldadeFilterStyle(d)}`}
+              >
+                {d} {d !== "Todos" && `(${tecidos.filter((t) => t.dificuldade === d).length})`}
+              </button>
+            ))}
+          </div>
         </div>
 
         <p className="text-sm text-muted-foreground mb-4">{filtrados.length} tecido{filtrados.length !== 1 ? "s" : ""} encontrado{filtrados.length !== 1 ? "s" : ""}</p>
@@ -138,7 +182,14 @@ export default function Tecidos() {
             >
               <div className="flex items-center gap-3 mb-3">
                 <span className="text-3xl">{t.emoji}</span>
-                <h3 className="font-display text-xl font-semibold">{t.nome}</h3>
+                <div>
+                  <h3 className="font-display text-xl font-semibold">{t.nome}</h3>
+                  {t.categoria && (
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${getCategoriaStyle(t.categoria)}`}>
+                      {t.categoria === "Leve" ? "🪶 Leve" : t.categoria === "Estruturado" ? "🧱 Estruturado" : "🔄 Versátil"}
+                    </span>
+                  )}
+                </div>
               </div>
               <div className="space-y-1.5 text-sm">
                 <p><span className="text-muted-foreground">Composição:</span> {t.composicao}</p>
@@ -146,7 +197,12 @@ export default function Tecidos() {
                 <p><span className="text-muted-foreground">Elasticidade:</span> {t.elasticidade}</p>
                 <p><span className="text-muted-foreground">Caimento:</span> {t.caimento}</p>
                 <p><span className="text-muted-foreground">Roupas ideais:</span> {t.roupas}</p>
-                <p><span className="text-muted-foreground">Forro:</span> {t.forro}</p>
+                {t.modelosIndicados && (
+                  <p><span className="text-muted-foreground">Modelos indicados:</span> <span className="text-primary font-medium">{t.modelosIndicados}</span></p>
+                )}
+                <div className="pt-1 border-t border-border mt-2">
+                  <p className="mt-2"><span className="text-muted-foreground">🧵 Forro:</span> {t.forro}</p>
+                </div>
                 <div className="pt-2">
                   <span className={`text-xs px-3 py-1 rounded-full font-medium ${getDificuldadeStyle(t.dificuldade)}`}>
                     {t.dificuldade}
