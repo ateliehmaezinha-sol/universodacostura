@@ -16,9 +16,9 @@ const cursos = [
     emoji: "📋",
   },
   {
-    titulo: "Calça Feminina Sob Medida",
-    desc: "Curso específico para confecção de calças femininas perfeitas. Aprenda ajustes, forros e acabamentos profissionais.",
-    emoji: "👖",
+    titulo: "Modelagem Infantil - Moda Kids",
+    desc: "Aprenda a criar moldes e peças infantis encantadoras. Técnicas especiais para roupas confortáveis e estilosas para crianças.",
+    emoji: "🧒",
   },
   {
     titulo: "Costura Profissional",
