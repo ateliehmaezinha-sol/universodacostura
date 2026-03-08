@@ -25,7 +25,8 @@ const cursos = [
   },
   {
     titulo: "Costura Profissional",
-    desc: "Da modelagem ao acabamento, ensino técnicas exclusivas usando base de modelagem do padrão industrial com as Réguas LD Molde Perfeito. Aqui no Atelieh Mãezinha a cliente prova uma vez só — já ensinei muitas alunas a fazer o mesmo, e o resultado surpreende até as clientes!",
+    desc: "Teste seu Conhecimento em 2 minutos",
+    botao: "Responda o Quiz",
     emoji: "🧵",
     destaque: true,
     link: "https://nivelmodelagem.lovable.app/",
