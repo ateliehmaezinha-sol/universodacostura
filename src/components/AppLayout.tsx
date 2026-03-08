@@ -95,7 +95,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 w-64 bg-primary flex-col p-6 z-40">
         <div className="mb-10">
-          <h1 className="font-display text-2xl text-primary-foreground">✨ Ateliê</h1>
+          <h1 className="font-display text-2xl text-primary-foreground">✨ Atelieh</h1>
           <p className="font-display text-lg text-accent">Mãezinha</p>
           <p className="text-xs text-primary-foreground/40 mt-1">Estrelas de Sucesso Express</p>
         </div>

@@ -13,7 +13,7 @@ const features = [
   { path: "/tecidos", label: "Biblioteca de Tecidos", desc: "Consulte nossa base de tecidos", icon: BookOpen, emoji: "📚" },
   { path: "/ideias", label: "Ideias de Modelos", desc: "Inspire-se com modelos incríveis", icon: Lightbulb, emoji: "💡" },
   { path: "/clientes", label: "Cadastro de Clientes", desc: "Organize seus clientes e medidas", icon: Users, emoji: "👥" },
-  { path: "/financeiro", label: "Controle Financeiro", desc: "Gerencie as finanças do ateliê", icon: DollarSign, emoji: "💰" },
+  { path: "/financeiro", label: "Controle Financeiro", desc: "Gerencie as finanças do atelieh", icon: DollarSign, emoji: "💰" },
   { path: "/cursos", label: "Cursos da Sol", desc: "Aprenda com a Sol", icon: GraduationCap, emoji: "🎓" },
 ];
 

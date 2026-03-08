@@ -58,7 +58,7 @@ export default function Financeiro() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-display font-bold">💰 Controle Financeiro</h1>
-            <p className="text-muted-foreground">Gerencie as finanças do seu ateliê</p>
+            <p className="text-muted-foreground">Gerencie as finanças do seu atelieh</p>
           </div>
           <Button onClick={() => setShowForm(!showForm)} className="bg-accent text-accent-foreground hover:bg-gold-dark rounded-xl">
             <Plus size={18} className="mr-2" /> Novo Serviço
