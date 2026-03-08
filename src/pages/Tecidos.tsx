@@ -221,6 +221,7 @@ export default function Tecidos() {
   const [busca, setBusca] = useState("");
   const [filtroDificuldade, setFiltroDificuldade] = useState<string>("Todos");
   const [filtroCategoria, setFiltroCategoria] = useState<string>("Todos");
+  const [expandido, setExpandido] = useState<string | null>(null);
 
   const normalizeText = (text: string) => {
     return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
