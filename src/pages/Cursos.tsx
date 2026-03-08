@@ -9,36 +9,41 @@ const cursos = [
     desc: "Aprenda a criar moldes profissionais do zero. Curso completo para iniciantes e intermediárias que desejam dominar a arte da modelagem.",
     emoji: "📐",
     destaque: true,
+    link: "",
   },
   {
-    titulo: "Interpretação de Modelagem",
-    desc: "Domine a técnica de interpretar e adaptar moldes para diferentes estilos e corpos. Transforme moldes base em peças exclusivas.",
+    titulo: "Interpretação de Modelagem Feminina + Calças",
+    desc: "Domine a técnica de interpretar e adaptar moldes para diferentes estilos e corpos. Transforme moldes base em peças exclusivas, incluindo modelagem completa de calças femininas.",
     emoji: "📋",
+    link: "https://pay.kiwify.com.br/c9Q1vdU",
   },
   {
     titulo: "Modelagem Infantil - Moda Kids",
     desc: "Aprenda a criar moldes e peças infantis encantadoras. Técnicas especiais para roupas confortáveis e estilosas para crianças.",
     emoji: "🧒",
+    link: "",
   },
   {
     titulo: "Costura Profissional",
     desc: "Da modelagem ao acabamento, ensino técnicas exclusivas usando base de modelagem do padrão industrial com as Réguas LD Molde Perfeito. Aqui no Atelieh Mãezinha a cliente prova uma vez só — já ensinei muitas alunas a fazer o mesmo, e o resultado surpreende até as clientes!",
     emoji: "🧵",
     destaque: true,
+    link: "",
   },
   {
     titulo: "Assistente IA – Costureira Estrela de Sucesso ⭐🧵",
     desc: "Sua secretária digital que trabalha 24h, sem cobrar salário e sem fazer cara feia! A IA Costureira complementa o app, tira dúvidas sobre costura, tecidos, preços e acabamentos. Apoio, direção e incentivo diário para quem transformou a costura em fonte de renda. Porque quem aprende, não depende!",
     emoji: "🤖",
     destaque: true,
+    link: "",
   },
   {
     titulo: "Camisa Feminina – 100% Online",
     desc: "Curso prático e descomplicado! Aprenda do zero ao acabamento perfeito usando base de modelagem do padrão industrial. Tire medidas, modele, corte e costure camisas femininas exclusivas. Inclui suporte VIP no Telegram, mentoria por videochamada e comunidade de apoio. Aprenda também a vender suas camisas e criar um negócio lucrativo!",
     emoji: "👔",
+    link: "",
   },
 ];
-
 export default function Cursos() {
   return (
     <AppLayout>
@@ -68,16 +73,31 @@ export default function Cursos() {
               <p className={`text-sm flex-1 mb-6 ${c.destaque ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
                 {c.desc}
               </p>
-              <Button
-                className={`w-full rounded-xl ${
-                  c.destaque
-                    ? "bg-accent text-accent-foreground hover:bg-gold-dark"
-                    : "bg-primary text-primary-foreground hover:bg-primary/90"
-                }`}
-              >
-                <ExternalLink size={16} className="mr-2" />
-                Saiba Mais
-              </Button>
+              {c.link ? (
+                <a href={c.link} target="_blank" rel="noopener noreferrer" className="w-full">
+                  <Button
+                    className={`w-full rounded-xl ${
+                      c.destaque
+                        ? "bg-accent text-accent-foreground hover:bg-gold-dark"
+                        : "bg-primary text-primary-foreground hover:bg-primary/90"
+                    }`}
+                  >
+                    <ExternalLink size={16} className="mr-2" />
+                    Comprar Curso
+                  </Button>
+                </a>
+              ) : (
+                <Button
+                  className={`w-full rounded-xl ${
+                    c.destaque
+                      ? "bg-accent text-accent-foreground hover:bg-gold-dark"
+                      : "bg-primary text-primary-foreground hover:bg-primary/90"
+                  }`}
+                  disabled
+                >
+                  Em breve
+                </Button>
+              )}
             </motion.div>
           ))}
         </div>
