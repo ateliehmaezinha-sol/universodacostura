@@ -90,19 +90,30 @@ export default function Criador() {
       toast.error("Digite o número do WhatsApp do cliente");
       return;
     }
+
     const numero = telefoneWhatsApp.replace(/\D/g, "");
     const numeroFormatado = numero.startsWith("55") ? numero : `55${numero}`;
-    
+
     const mensagem = encodeURIComponent(
       `✨ Olha a criação que fiz para você!\n\n👗 ${comando}\n\n📎 A imagem da peça está em anexo. O que achou?`
     );
-    
-    // Open WhatsApp first (uses the user gesture so it won't be blocked)
-    window.open(`https://wa.me/${numeroFormatado}?text=${mensagem}`, "_blank");
-    
-    // Then download the image after a small delay
+
+    const isMobile = /Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
+    const whatsappUrl = isMobile
+      ? `https://wa.me/${numeroFormatado}?text=${mensagem}`
+      : `https://web.whatsapp.com/send?phone=${numeroFormatado}&text=${mensagem}`;
+
+    // Use native anchor navigation to avoid popup/iframe blockers
+    const link = document.createElement("a");
+    link.href = whatsappUrl;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
     setTimeout(() => baixarImagem(), 500);
-    toast.success("WhatsApp aberto! A imagem foi baixada para você anexar.");
+    toast.success("Tentando abrir o WhatsApp em nova aba. A imagem foi baixada para anexar.");
   };
 
   return (
