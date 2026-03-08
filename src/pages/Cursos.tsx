@@ -32,9 +32,9 @@ const cursos = [
     emoji: "🧥",
   },
   {
-    titulo: "Vestidos de Festa",
-    desc: "Aprenda a criar vestidos de festa deslumbrantes. Drapeados, recortes, aplicações e forros profissionais.",
-    emoji: "👗",
+    titulo: "Camisa Feminina",
+    desc: "Aprenda a confeccionar camisas femininas elegantes. Golas, punhos, pences e acabamentos impecáveis passo a passo.",
+    emoji: "👔",
   },
 ];
 
