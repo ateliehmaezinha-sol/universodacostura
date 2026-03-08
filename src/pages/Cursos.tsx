@@ -43,7 +43,7 @@ export default function Cursos() {
     <AppLayout>
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <div className="text-center mb-10">
-          <h1 className="text-3xl md:text-4xl font-display font-bold mb-2">🎓 Cursos da Sol</h1>
+          <h1 className="text-3xl md:text-4xl font-display font-bold mb-2">🎓 Área de Cursos</h1>
           <p className="text-muted-foreground max-w-lg mx-auto">
             Aprenda com a Sol e transforme sua costura em uma carreira de sucesso
           </p>
