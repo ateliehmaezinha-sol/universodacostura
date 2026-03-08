@@ -836,16 +836,28 @@ export default function Tecidos() {
               transition={{ delay: i * 0.03 }}
               className="bg-card border border-border rounded-2xl p-5 card-hover flex flex-col"
             >
-              <div className="flex items-center gap-3 mb-3">
-                <span className="text-3xl">{t.emoji}</span>
-                <div>
-                  <h3 className="font-display text-xl font-semibold">{t.nome}</h3>
-                  {t.categoria && (
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${getCategoriaStyle(t.categoria)}`}>
-                      {t.categoria === "Leve" ? "🪶 Leve" : t.categoria === "Estruturado" ? "🧱 Estruturado" : "🔄 Versátil"}
-                    </span>
-                  )}
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <span className="text-3xl">{t.emoji}</span>
+                  <div>
+                    <h3 className="font-display text-xl font-semibold">{t.nome}</h3>
+                    {t.categoria && (
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${getCategoriaStyle(t.categoria)}`}>
+                        {t.categoria === "Leve" ? "🪶 Leve" : t.categoria === "Estruturado" ? "🧱 Estruturado" : "🔄 Versátil"}
+                      </span>
+                    )}
+                  </div>
                 </div>
+                <button
+                  onClick={() => toggleFavorito(t.nome)}
+                  className="p-1.5 rounded-lg hover:bg-accent/50 transition-colors"
+                  title={favoritos.includes(t.nome) ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+                >
+                  <Heart
+                    size={18}
+                    className={favoritos.includes(t.nome) ? "fill-red-500 text-red-500" : "text-muted-foreground"}
+                  />
+                </button>
               </div>
               <div className="space-y-1.5 text-sm flex-1">
                 <p><span className="text-muted-foreground">Composição:</span> {t.composicao}</p>
