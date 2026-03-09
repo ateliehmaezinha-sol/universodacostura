@@ -15,6 +15,7 @@ const navItems = [
   { path: "/ideias", label: "Ideias", icon: Lightbulb },
   { path: "/clientes", label: "Clientes", icon: Users },
   { path: "/financeiro", label: "Financeiro", icon: DollarSign },
+  { path: "/loja", label: "Loja das Musas", icon: ShoppingBag },
   { path: "/cursos", label: "Cursos", icon: GraduationCap },
   { path: "/assistente", label: "Assistente", icon: MessageCircle },
 ];
