@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 
 const navItems = [
-  { path: "/dashboard", label: "Início", icon: Home },
+  { path: "/loja", label: "Loja das Musas", sublabel: "Universo da Costura com a Sol", icon: ShoppingBag },
   { path: "/calculadora", label: "Calculadora", icon: Calculator },
   { path: "/identificador", label: "Identificar Tecido", icon: Camera },
   { path: "/criador", label: "Criar Roupa", icon: Palette },
@@ -15,9 +15,9 @@ const navItems = [
   { path: "/ideias", label: "Ideias", icon: Lightbulb },
   { path: "/clientes", label: "Clientes", icon: Users },
   { path: "/financeiro", label: "Financeiro", icon: DollarSign },
-  { path: "/loja", label: "Loja das Musas", icon: ShoppingBag },
   { path: "/cursos", label: "Cursos", icon: GraduationCap },
   { path: "/assistente", label: "Assistente", icon: MessageCircle },
+  { path: "/dashboard", label: "Início", icon: Home },
 ];
 
 export default function AppLayout({ children }: { children: ReactNode }) {
@@ -79,8 +79,13 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                           : "text-primary-foreground/70 hover:text-primary-foreground hover:bg-accent/10"
                       }`}
                     >
-                      <item.icon size={18} />
-                      {item.label}
+                      <item.icon size={18} className="shrink-0" />
+                      <span className="flex flex-col leading-tight">
+                        <span>{item.label}</span>
+                        {"sublabel" in item && item.sublabel && (
+                          <span className="text-xs font-normal opacity-70">{item.sublabel}</span>
+                        )}
+                      </span>
                     </Link>
                   );
                 })}
@@ -113,8 +118,13 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                     : "text-primary-foreground/60 hover:text-primary-foreground hover:bg-accent/10"
                 }`}
               >
-                <item.icon size={18} />
-                {item.label}
+                <item.icon size={18} className="shrink-0" />
+                <span className="flex flex-col leading-tight">
+                  <span>{item.label}</span>
+                  {"sublabel" in item && item.sublabel && (
+                    <span className="text-xs font-normal opacity-60">{item.sublabel}</span>
+                  )}
+                </span>
               </Link>
             );
           })}
