@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Home, Calculator, Camera, Palette, Lightbulb, Users,
-  DollarSign, GraduationCap, MessageCircle, Menu, X, LogOut, Scissors
+  DollarSign, GraduationCap, MessageCircle, Menu, X, LogOut, Scissors, ShoppingBag
 } from "lucide-react";
 
 const navItems = [
@@ -15,6 +15,7 @@ const navItems = [
   { path: "/ideias", label: "Ideias", icon: Lightbulb },
   { path: "/clientes", label: "Clientes", icon: Users },
   { path: "/financeiro", label: "Financeiro", icon: DollarSign },
+  { path: "/loja", label: "Loja das Musas", icon: ShoppingBag },
   { path: "/cursos", label: "Cursos", icon: GraduationCap },
   { path: "/assistente", label: "Assistente", icon: MessageCircle },
 ];
