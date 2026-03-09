@@ -174,6 +174,25 @@ export default function Financeiro() {
   const { faturamento, custos } = calcTotalGeral();
   const lucro = faturamento - custos;
 
+  const mesesDisponiveis = useMemo(() => {
+    const set = new Set<string>();
+    servicos.forEach(s => {
+      if (s.data) {
+        const [ano, mes] = s.data.split('-');
+        set.add(`${ano}-${mes}`);
+      }
+    });
+    return Array.from(set).sort().reverse();
+  }, [servicos]);
+
+  const servicosFiltrados = useMemo(() => {
+    return servicos.filter(s => {
+      const matchNome = filtroNome.trim() === "" || s.cliente.toLowerCase().includes(filtroNome.toLowerCase());
+      const matchMes = filtroMes === "todos" || (s.data && s.data.startsWith(filtroMes));
+      return matchNome && matchMes;
+    });
+  }, [servicos, filtroNome, filtroMes]);
+
   const stats = [
     { label: "Faturamento", value: faturamento, icon: DollarSign, color: "bg-accent/10 text-accent" },
     { label: "Custos Totais", value: custos, icon: Wallet, color: "bg-destructive/10 text-destructive" },
