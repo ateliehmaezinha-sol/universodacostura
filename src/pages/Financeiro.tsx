@@ -62,7 +62,9 @@ export default function Financeiro() {
 
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  
+  const [filtroNome, setFiltroNome] = useState("");
+  const [filtroMes, setFiltroMes] = useState("todos");
+
   const [modalidade, setModalidade] = useState<"mao_de_obra" | "material_proprio">("mao_de_obra");
   const [form, setForm] = useState(initialForm);
   const [aviamentos, setAviamentos] = useState<Record<string, string>>(initialAviamentos);
