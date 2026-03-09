@@ -374,7 +374,41 @@ export default function Financeiro() {
         )}
 
         {servicos.length > 0 ? (
-          <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row gap-3 p-4 bg-card border border-border rounded-2xl shadow-sm">
+              <div className="flex items-center gap-2 flex-1">
+                <Search size={16} className="text-muted-foreground shrink-0" />
+                <Input
+                  placeholder="Filtrar por nome do cliente..."
+                  value={filtroNome}
+                  onChange={(e) => setFiltroNome(e.target.value)}
+                  className="h-9 border-border"
+                />
+              </div>
+              <div className="flex items-center gap-2 sm:w-56">
+                <Filter size={16} className="text-muted-foreground shrink-0" />
+                <Select value={filtroMes} onValueChange={setFiltroMes}>
+                  <SelectTrigger className="h-9">
+                    <SelectValue placeholder="Filtrar por mês" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todos">Todos os meses</SelectItem>
+                    {mesesDisponiveis.map(m => {
+                      const [ano, mes] = m.split('-');
+                      const label = new Date(Number(ano), Number(mes) - 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+                      return <SelectItem key={m} value={m}>{label.charAt(0).toUpperCase() + label.slice(1)}</SelectItem>;
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
+              {(filtroNome || filtroMes !== "todos") && (
+                <Button variant="ghost" size="sm" onClick={() => { setFiltroNome(""); setFiltroMes("todos"); }} className="text-muted-foreground hover:text-foreground h-9 shrink-0">
+                  <X size={14} className="mr-1" /> Limpar
+                </Button>
+              )}
+            </div>
+
+            <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-secondary/50">
