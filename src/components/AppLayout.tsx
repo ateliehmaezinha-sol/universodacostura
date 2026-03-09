@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 
 const navItems = [
-  { path: "/dashboard", label: "Início", icon: Home },
+  { path: "/loja", label: "Loja das Musas", sublabel: "Universo da Costura com a Sol", icon: ShoppingBag },
   { path: "/calculadora", label: "Calculadora", icon: Calculator },
   { path: "/identificador", label: "Identificar Tecido", icon: Camera },
   { path: "/criador", label: "Criar Roupa", icon: Palette },
@@ -15,9 +15,9 @@ const navItems = [
   { path: "/ideias", label: "Ideias", icon: Lightbulb },
   { path: "/clientes", label: "Clientes", icon: Users },
   { path: "/financeiro", label: "Financeiro", icon: DollarSign },
-  { path: "/loja", label: "Loja das Musas", icon: ShoppingBag },
   { path: "/cursos", label: "Cursos", icon: GraduationCap },
   { path: "/assistente", label: "Assistente", icon: MessageCircle },
+  { path: "/dashboard", label: "Início", icon: Home },
 ];
 
 export default function AppLayout({ children }: { children: ReactNode }) {
