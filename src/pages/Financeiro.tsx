@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, TrendingUp, DollarSign, Wallet, Trash2, Edit2, Calculator, X, Scissors } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Plus, TrendingUp, DollarSign, Wallet, Trash2, Edit2, Calculator, X, Scissors, Search, Filter } from "lucide-react";
 
 interface Aviamentos {
   linha: number;
@@ -61,7 +62,9 @@ export default function Financeiro() {
 
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  
+  const [filtroNome, setFiltroNome] = useState("");
+  const [filtroMes, setFiltroMes] = useState("todos");
+
   const [modalidade, setModalidade] = useState<"mao_de_obra" | "material_proprio">("mao_de_obra");
   const [form, setForm] = useState(initialForm);
   const [aviamentos, setAviamentos] = useState<Record<string, string>>(initialAviamentos);
@@ -170,6 +173,25 @@ export default function Financeiro() {
 
   const { faturamento, custos } = calcTotalGeral();
   const lucro = faturamento - custos;
+
+  const mesesDisponiveis = useMemo(() => {
+    const set = new Set<string>();
+    servicos.forEach(s => {
+      if (s.data) {
+        const [ano, mes] = s.data.split('-');
+        set.add(`${ano}-${mes}`);
+      }
+    });
+    return Array.from(set).sort().reverse();
+  }, [servicos]);
+
+  const servicosFiltrados = useMemo(() => {
+    return servicos.filter(s => {
+      const matchNome = filtroNome.trim() === "" || s.cliente.toLowerCase().includes(filtroNome.toLowerCase());
+      const matchMes = filtroMes === "todos" || (s.data && s.data.startsWith(filtroMes));
+      return matchNome && matchMes;
+    });
+  }, [servicos, filtroNome, filtroMes]);
 
   const stats = [
     { label: "Faturamento", value: faturamento, icon: DollarSign, color: "bg-accent/10 text-accent" },
@@ -352,7 +374,41 @@ export default function Financeiro() {
         )}
 
         {servicos.length > 0 ? (
-          <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row gap-3 p-4 bg-card border border-border rounded-2xl shadow-sm">
+              <div className="flex items-center gap-2 flex-1">
+                <Search size={16} className="text-muted-foreground shrink-0" />
+                <Input
+                  placeholder="Filtrar por nome do cliente..."
+                  value={filtroNome}
+                  onChange={(e) => setFiltroNome(e.target.value)}
+                  className="h-9 border-border"
+                />
+              </div>
+              <div className="flex items-center gap-2 sm:w-56">
+                <Filter size={16} className="text-muted-foreground shrink-0" />
+                <Select value={filtroMes} onValueChange={setFiltroMes}>
+                  <SelectTrigger className="h-9">
+                    <SelectValue placeholder="Filtrar por mês" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todos">Todos os meses</SelectItem>
+                    {mesesDisponiveis.map(m => {
+                      const [ano, mes] = m.split('-');
+                      const label = new Date(Number(ano), Number(mes) - 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+                      return <SelectItem key={m} value={m}>{label.charAt(0).toUpperCase() + label.slice(1)}</SelectItem>;
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
+              {(filtroNome || filtroMes !== "todos") && (
+                <Button variant="ghost" size="sm" onClick={() => { setFiltroNome(""); setFiltroMes("todos"); }} className="text-muted-foreground hover:text-foreground h-9 shrink-0">
+                  <X size={14} className="mr-1" /> Limpar
+                </Button>
+              )}
+            </div>
+
+            <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-secondary/50">
@@ -367,7 +423,13 @@ export default function Financeiro() {
                   </tr>
                 </thead>
                 <tbody>
-                  {servicos.map((s) => {
+                  {servicosFiltrados.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="p-8 text-center text-muted-foreground">
+                        Nenhum serviço encontrado com os filtros aplicados.
+                      </td>
+                    </tr>
+                  ) : servicosFiltrados.map((s) => {
                     const custoAv = Object.values(s.aviamentos || {}).reduce((a, b) => a + (b || 0), 0);
                     const custoTotal = (s.custoTecido || 0) + custoAv;
                     const lucro = s.valorCobrado - custoTotal;
@@ -399,6 +461,7 @@ export default function Financeiro() {
                   })}
                 </tbody>
               </table>
+            </div>
             </div>
           </div>
         ) : (
