@@ -79,8 +79,13 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                           : "text-primary-foreground/70 hover:text-primary-foreground hover:bg-accent/10"
                       }`}
                     >
-                      <item.icon size={18} />
-                      {item.label}
+                      <item.icon size={18} className="shrink-0" />
+                      <span className="flex flex-col leading-tight">
+                        <span>{item.label}</span>
+                        {"sublabel" in item && item.sublabel && (
+                          <span className="text-xs font-normal opacity-70">{item.sublabel}</span>
+                        )}
+                      </span>
                     </Link>
                   );
                 })}
