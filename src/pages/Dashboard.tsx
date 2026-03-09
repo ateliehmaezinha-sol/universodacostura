@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Calculator, Camera, Palette, BookOpen, Lightbulb,
-  Users, DollarSign, GraduationCap, ShoppingBag
+  Users, DollarSign, GraduationCap
 } from "lucide-react";
 import AppLayout from "@/components/AppLayout";
 
