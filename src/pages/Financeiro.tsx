@@ -423,7 +423,13 @@ export default function Financeiro() {
                   </tr>
                 </thead>
                 <tbody>
-                  {servicos.map((s) => {
+                  {servicosFiltrados.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="p-8 text-center text-muted-foreground">
+                        Nenhum serviço encontrado com os filtros aplicados.
+                      </td>
+                    </tr>
+                  ) : servicosFiltrados.map((s) => {
                     const custoAv = Object.values(s.aviamentos || {}).reduce((a, b) => a + (b || 0), 0);
                     const custoTotal = (s.custoTecido || 0) + custoAv;
                     const lucro = s.valorCobrado - custoTotal;
@@ -455,6 +461,7 @@ export default function Financeiro() {
                   })}
                 </tbody>
               </table>
+            </div>
             </div>
           </div>
         ) : (
