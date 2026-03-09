@@ -5,6 +5,7 @@ import {
   Users, DollarSign, GraduationCap
 } from "lucide-react";
 import AppLayout from "@/components/AppLayout";
+import QRCodeCard from "@/components/QRCodeCard";
 
 const features = [
   { path: "/calculadora", label: "Calculadora de Preço", desc: "Calcule o valor ideal dos seus serviços", icon: Calculator, emoji: "🧮" },
@@ -50,6 +51,10 @@ export default function Dashboard() {
               </Link>
             </motion.div>
           ))}
+        </div>
+
+        <div className="mt-8 flex justify-center">
+          <QRCodeCard />
         </div>
       </motion.div>
     </AppLayout>
