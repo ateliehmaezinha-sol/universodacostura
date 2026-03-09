@@ -14,7 +14,6 @@ const features = [
   { path: "/ideias", label: "Ideias de Modelos", desc: "Inspire-se com modelos incríveis", icon: Lightbulb, emoji: "💡" },
   { path: "/clientes", label: "Cadastro de Clientes", desc: "Organize seus clientes e medidas", icon: Users, emoji: "👥" },
   { path: "/financeiro", label: "Controle Financeiro", desc: "Gerencie as finanças do atelieh", icon: DollarSign, emoji: "💰" },
-  { path: "/loja", label: "Loja das Musas", desc: "Produtos de autocuidado, aviamentos e mais", icon: ShoppingBag, emoji: "🛍️" },
   { path: "/cursos", label: "Cursos da Sol", desc: "Aprenda com a Sol", icon: GraduationCap, emoji: "🎓" },
 ];
 
