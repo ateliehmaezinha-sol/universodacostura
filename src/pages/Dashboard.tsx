@@ -52,6 +52,10 @@ export default function Dashboard() {
             </motion.div>
           ))}
         </div>
+
+        <div className="mt-8 flex justify-center">
+          <QRCodeCard />
+        </div>
       </motion.div>
     </AppLayout>
   );
