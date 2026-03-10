@@ -5,7 +5,7 @@ import {
   Users, DollarSign, GraduationCap
 } from "lucide-react";
 import AppLayout from "@/components/AppLayout";
-import QRCodeCard from "@/components/QRCodeCard";
+import YoutubeCard from "@/components/YoutubeCard";
 
 const features = [
   { path: "/calculadora", label: "Calculadora de Preço", desc: "Calcule o valor ideal dos seus serviços", icon: Calculator, emoji: "🧮" },
