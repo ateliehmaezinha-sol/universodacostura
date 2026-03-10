@@ -54,7 +54,7 @@ export default function Dashboard() {
         </div>
 
         <div className="mt-8 flex justify-center">
-          <QRCodeCard />
+          <YoutubeCard />
         </div>
       </motion.div>
     </AppLayout>
