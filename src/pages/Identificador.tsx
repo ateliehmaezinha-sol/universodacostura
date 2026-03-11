@@ -194,9 +194,13 @@ export default function Identificador() {
                 onClick={() => fileRef.current?.click()}
                 className="w-full h-64 rounded-2xl border-2 border-dashed border-border bg-card flex flex-col items-center justify-center gap-3 hover:border-accent transition-colors"
               >
-                <Camera size={48} className="text-muted-foreground" />
-                <span className="text-muted-foreground font-medium">Toque para enviar foto</span>
-                <span className="text-xs text-muted-foreground">ou arraste uma imagem aqui</span>
+                {mode === "tecido" ? <Camera size={48} className="text-muted-foreground" /> : <Shirt size={48} className="text-muted-foreground" />}
+                <span className="text-muted-foreground font-medium">
+                  {mode === "tecido" ? "Toque para enviar foto do tecido" : "Toque para enviar foto da roupa"}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {mode === "roupa" ? "Vestidos, blusas, blazers, calças, saias..." : "ou arraste uma imagem aqui"}
+                </span>
               </button>
             )}
 
