@@ -55,7 +55,10 @@ function resizeImage(base64: string, maxW = 120): Promise<string> {
   });
 }
 
+type IdentifyMode = "tecido" | "roupa";
+
 export default function Identificador() {
+  const [mode, setMode] = useState<IdentifyMode>("tecido");
   const [imagem, setImagem] = useState<string | null>(null);
   const [resultado, setResultado] = useState<FabricInfo | null>(null);
   const [loading, setLoading] = useState(false);
