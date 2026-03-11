@@ -103,7 +103,7 @@ Responda APENAS em formato JSON válido, sem markdown, sem código, apenas o JSO
             content: [
               {
                 type: "text",
-                text: "Identifique este tecido na imagem. Analise a textura, brilho, transparência, trama e aparência geral.",
+                text: userText,
               },
               {
                 type: "image_url",
