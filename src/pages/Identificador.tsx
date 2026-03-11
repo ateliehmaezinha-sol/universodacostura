@@ -133,7 +133,39 @@ export default function Identificador() {
     <AppLayout>
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-3xl font-display font-bold mb-2">📸 Identificador de Tecidos</h1>
-        <p className="text-muted-foreground mb-8">Envie uma foto e descubra qual é o tecido com IA</p>
+        <p className="text-muted-foreground mb-6">Envie uma foto e descubra qual é o tecido com IA</p>
+
+        {/* Mode Selector */}
+        <div className="flex gap-3 mb-8">
+          <button
+            onClick={() => { setMode("tecido"); setImagem(null); setResultado(null); }}
+            className={`flex items-center gap-2 px-5 py-3 rounded-xl border-2 font-medium transition-all ${
+              mode === "tecido"
+                ? "border-accent bg-accent/10 text-accent"
+                : "border-border bg-card text-muted-foreground hover:border-accent/50"
+            }`}
+          >
+            <Camera size={20} />
+            <div className="text-left">
+              <p className="text-sm font-semibold">Amostra de Tecido</p>
+              <p className="text-xs opacity-70">Foto do tecido solto</p>
+            </div>
+          </button>
+          <button
+            onClick={() => { setMode("roupa"); setImagem(null); setResultado(null); }}
+            className={`flex items-center gap-2 px-5 py-3 rounded-xl border-2 font-medium transition-all ${
+              mode === "roupa"
+                ? "border-accent bg-accent/10 text-accent"
+                : "border-border bg-card text-muted-foreground hover:border-accent/50"
+            }`}
+          >
+            <Shirt size={20} />
+            <div className="text-left">
+              <p className="text-sm font-semibold">Roupa Pronta</p>
+              <p className="text-xs opacity-70">Vestido, blusa, calça...</p>
+            </div>
+          </button>
+        </div>
 
         <div className="grid md:grid-cols-2 gap-8">
           <div className="space-y-4">
