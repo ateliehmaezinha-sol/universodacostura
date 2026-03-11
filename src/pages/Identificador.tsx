@@ -217,7 +217,9 @@ export default function Identificador() {
             )}
 
             <p className="text-xs text-muted-foreground text-center">
-              🤖 Identificação por IA — quanto melhor a foto, mais preciso o resultado
+              🤖 {mode === "tecido" 
+                ? "Identificação por IA — quanto melhor a foto, mais preciso o resultado"
+                : "Envie foto de qualquer peça: vestidos de festa, blusas, blazers, calças, saias e mais"}
             </p>
           </div>
 
