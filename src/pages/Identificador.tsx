@@ -95,7 +95,7 @@ export default function Identificador() {
     setResultado(null);
     try {
       const { data, error } = await supabase.functions.invoke("identify-fabric", {
-        body: { imageBase64 },
+        body: { imageBase64, mode },
       });
       if (error) throw new Error(error.message || "Erro ao identificar tecido");
       if (data?.error) throw new Error(data.error);
