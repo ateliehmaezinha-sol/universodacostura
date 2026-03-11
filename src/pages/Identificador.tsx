@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
-import { Camera, Upload, Loader2, History, Trash2, ChevronDown, ChevronUp } from "lucide-react";
+import { Camera, Upload, Loader2, History, Trash2, ChevronDown, ChevronUp, Shirt } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -55,7 +55,10 @@ function resizeImage(base64: string, maxW = 120): Promise<string> {
   });
 }
 
+type IdentifyMode = "tecido" | "roupa";
+
 export default function Identificador() {
+  const [mode, setMode] = useState<IdentifyMode>("tecido");
   const [imagem, setImagem] = useState<string | null>(null);
   const [resultado, setResultado] = useState<FabricInfo | null>(null);
   const [loading, setLoading] = useState(false);
@@ -92,7 +95,7 @@ export default function Identificador() {
     setResultado(null);
     try {
       const { data, error } = await supabase.functions.invoke("identify-fabric", {
-        body: { imageBase64 },
+        body: { imageBase64, mode },
       });
       if (error) throw new Error(error.message || "Erro ao identificar tecido");
       if (data?.error) throw new Error(data.error);
@@ -130,7 +133,39 @@ export default function Identificador() {
     <AppLayout>
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-3xl font-display font-bold mb-2">📸 Identificador de Tecidos</h1>
-        <p className="text-muted-foreground mb-8">Envie uma foto e descubra qual é o tecido com IA</p>
+        <p className="text-muted-foreground mb-6">Envie uma foto e descubra qual é o tecido com IA</p>
+
+        {/* Mode Selector */}
+        <div className="flex gap-3 mb-8">
+          <button
+            onClick={() => { setMode("tecido"); setImagem(null); setResultado(null); }}
+            className={`flex items-center gap-2 px-5 py-3 rounded-xl border-2 font-medium transition-all ${
+              mode === "tecido"
+                ? "border-accent bg-accent/10 text-accent"
+                : "border-border bg-card text-muted-foreground hover:border-accent/50"
+            }`}
+          >
+            <Camera size={20} />
+            <div className="text-left">
+              <p className="text-sm font-semibold">Amostra de Tecido</p>
+              <p className="text-xs opacity-70">Foto do tecido solto</p>
+            </div>
+          </button>
+          <button
+            onClick={() => { setMode("roupa"); setImagem(null); setResultado(null); }}
+            className={`flex items-center gap-2 px-5 py-3 rounded-xl border-2 font-medium transition-all ${
+              mode === "roupa"
+                ? "border-accent bg-accent/10 text-accent"
+                : "border-border bg-card text-muted-foreground hover:border-accent/50"
+            }`}
+          >
+            <Shirt size={20} />
+            <div className="text-left">
+              <p className="text-sm font-semibold">Roupa Pronta</p>
+              <p className="text-xs opacity-70">Vestido, blusa, calça...</p>
+            </div>
+          </button>
+        </div>
 
         <div className="grid md:grid-cols-2 gap-8">
           <div className="space-y-4">
@@ -159,9 +194,13 @@ export default function Identificador() {
                 onClick={() => fileRef.current?.click()}
                 className="w-full h-64 rounded-2xl border-2 border-dashed border-border bg-card flex flex-col items-center justify-center gap-3 hover:border-accent transition-colors"
               >
-                <Camera size={48} className="text-muted-foreground" />
-                <span className="text-muted-foreground font-medium">Toque para enviar foto</span>
-                <span className="text-xs text-muted-foreground">ou arraste uma imagem aqui</span>
+                {mode === "tecido" ? <Camera size={48} className="text-muted-foreground" /> : <Shirt size={48} className="text-muted-foreground" />}
+                <span className="text-muted-foreground font-medium">
+                  {mode === "tecido" ? "Toque para enviar foto do tecido" : "Toque para enviar foto da roupa"}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {mode === "roupa" ? "Vestidos, blusas, blazers, calças, saias..." : "ou arraste uma imagem aqui"}
+                </span>
               </button>
             )}
 
@@ -178,7 +217,9 @@ export default function Identificador() {
             )}
 
             <p className="text-xs text-muted-foreground text-center">
-              🤖 Identificação por IA — quanto melhor a foto, mais preciso o resultado
+              🤖 {mode === "tecido" 
+                ? "Identificação por IA — quanto melhor a foto, mais preciso o resultado"
+                : "Envie foto de qualquer peça: vestidos de festa, blusas, blazers, calças, saias e mais"}
             </p>
           </div>
 

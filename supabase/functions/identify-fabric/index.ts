@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { imageBase64 } = await req.json();
+    const { imageBase64, mode } = await req.json();
     if (!imageBase64) {
       return new Response(JSON.stringify({ error: "No image provided" }), {
         status: 400,
@@ -25,7 +25,39 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const systemPrompt = `Você é um especialista em tecidos e costura. Analise a imagem do tecido enviada e identifique:
+    const isRoupa = mode === "roupa";
+
+    const systemPrompt = isRoupa
+      ? `Você é um especialista em tecidos e moda feminina. Analise a imagem da ROUPA PRONTA enviada (pode ser vestido, blusa, blazer, calça, saia, vestido de festa, ou qualquer peça do vestuário feminino) e identifique o tecido usado na confecção.
+
+Observe detalhes como: brilho, caimento na peça, transparência, textura visível, estrutura, e como o tecido se comporta no corpo.
+
+Identifique:
+1. O nome do tecido principal da peça (ex: Crepe, Cetim, Tule, Renda, Chiffon, Organza, Seda, Malha, Viscose, Jacquard, Veludo, Tafetá, etc.)
+2. A composição provável
+3. O tipo de caimento observado na peça
+4. O nível de elasticidade
+5. A dificuldade de costura
+6. Tipo de peça identificada (vestido de festa, blusa casual, blazer, etc.)
+7. Se a peça parece ter forro
+8. Agulha recomendada para costurar esse tecido
+9. Linha recomendada
+
+Responda APENAS em formato JSON válido, sem markdown:
+{
+  "nome": "Nome do Tecido",
+  "composicao": "Composição provável",
+  "caimento": "Tipo de caimento observado",
+  "elasticidade": "Nível de elasticidade",
+  "dificuldade": "Fácil/Médio/Avançado",
+  "roupas": "Tipo de peça identificada e outras peças ideais para esse tecido",
+  "forro": "Se a peça aparenta ter forro e recomendação",
+  "agulha": "Agulha recomendada",
+  "linha": "Linha recomendada",
+  "confianca": "Alta/Média/Baixa",
+  "observacoes": "Detalhes extras sobre o tecido observado na peça, dicas para reproduzir"
+}`
+      : `Você é um especialista em tecidos e costura. Analise a imagem do tecido enviada e identifique:
 
 1. O nome do tecido (seja específico, ex: Crepe, Viscose, Cetim, Malha, Tricoline, Oxford, Linho, Seda, Chiffon, Organza, Tule, Jeans/Denim, Moletom, Neoprene, Renda, Jacquard, Brim, Sarja, Popeline, Gabardine, Cambraia, Musseline, Tafetá, Veludo, Suede, etc.)
 2. A composição provável
@@ -52,6 +84,10 @@ Responda APENAS em formato JSON válido, sem markdown, sem código, apenas o JSO
   "observacoes": "Observações extras sobre o tecido"
 }`;
 
+    const userText = isRoupa
+      ? "Identifique o tecido desta roupa pronta. Analise o caimento, brilho, textura e estrutura do tecido na peça."
+      : "Identifique este tecido na imagem. Analise a textura, brilho, transparência, trama e aparência geral.";
+
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -67,7 +103,7 @@ Responda APENAS em formato JSON válido, sem markdown, sem código, apenas o JSO
             content: [
               {
                 type: "text",
-                text: "Identifique este tecido na imagem. Analise a textura, brilho, transparência, trama e aparência geral.",
+                text: userText,
               },
               {
                 type: "image_url",
