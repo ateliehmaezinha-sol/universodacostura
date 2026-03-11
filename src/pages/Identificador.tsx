@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
-import { Camera, Upload, Loader2, History, Trash2, ChevronDown, ChevronUp } from "lucide-react";
+import { Camera, Upload, Loader2, History, Trash2, ChevronDown, ChevronUp, Shirt } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
