@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { imageBase64, mode } = await req.json();
+    const { imageBase64, mode, userFeedback } = await req.json();
     if (!imageBase64) {
       return new Response(JSON.stringify({ error: "No image provided" }), {
         status: 400,
@@ -25,68 +25,91 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const isRoupa = mode === "roupa";
+    const isGarmentMode = mode === "garment" || mode === "roupa";
 
-    const systemPrompt = isRoupa
-      ? `Você é um especialista em tecidos e moda feminina. Analise a imagem da ROUPA PRONTA enviada (pode ser vestido, blusa, blazer, calça, saia, vestido de festa, ou qualquer peça do vestuário feminino) e identifique o tecido usado na confecção.
+    let feedbackInstruction = "";
+    if (userFeedback) {
+      feedbackInstruction = `\n\nIMPORTANTE: O usuário informou que a análise anterior estava incorreta. O feedback do usuário é: "${userFeedback}". Reavalie com extremo cuidado e, se o feedback for compatível com os sinais visuais, priorize essa correção.`;
+    }
 
-Observe detalhes como: brilho, caimento na peça, transparência, textura visível, estrutura, e como o tecido se comporta no corpo.
+    const mandatoryProtocol = `PROTOCOLO OBRIGATÓRIO (use internamente antes de decidir o nome final):
+1) Classifique PRIMEIRO a ESTRUTURA: MALHA ou TECIDO PLANO.
+2) Só depois escolha a família do tecido.
+3) Se os sinais de MALHA forem dominantes, NÃO retorne tecido plano (crepe plano, viscose plana, chiffon, sarja etc).
 
-Identifique:
-1. O nome do tecido principal da peça (ex: Crepe, Cetim, Tule, Renda, Chiffon, Organza, Seda, Malha, Viscose, Jacquard, Veludo, Tafetá, etc.)
-2. A composição provável
-3. O tipo de caimento observado na peça
-4. O nível de elasticidade
-5. A dificuldade de costura
-6. Tipo de peça identificada (vestido de festa, blusa casual, blazer, etc.)
-7. Se a peça parece ter forro
-8. Agulha recomendada para costurar esse tecido
-9. Linha recomendada
+SINAIS FORTES DE MALHA (knit):
+- Linhas horizontais/colunas de laçadas contínuas na superfície
+- Elasticidade visível, principalmente transversal
+- Borda cortada que não desfia como tecido plano (pode enrolar)
+- Toque e queda mais flexíveis/macios
 
-Responda APENAS em formato JSON válido, sem markdown:
+SINAIS FORTES DE TECIDO PLANO (woven):
+- Estrutura urdume + trama (grade cruzada)
+- Menor elasticidade natural (exceto com elastano)
+- Borda tende a desfiar quando cortada
+- Pode ter corpo mais estável dependendo da construção
+
+CASOS CRÍTICOS DE DECISÃO:
+- MALHA HELANCA/HELANQUINHA (forro): malha fina, superfície lisa, leve brilho sintético, elasticidade leve a moderada, muito usada como forro de vestidos/saias.
+- BENGALINE: tecido plano estruturado, firme, com elasticidade moderada e possível diagonal de sarja; não tem comportamento típico de malha de forro.
+- CREPE DE VISCOSE / VISCOSE DIGITAL: tecido plano leve e fluido; pode ter leve transparência e estampa digital vibrante.
+- CHIFFON/GEORGETTE: tecido plano muito leve, translúcido; não tem construção de malha.
+
+REGRAS ANTI-ERRO:
+- Se houver aparência de malha de forro preta/fina/lisa + elasticidade leve + borda sem desfiar, priorize "Malha Helanca (Helanquinha)" ou "Malha poliéster com elastano para forro".
+- Não chame de moletom se não houver espessura alta e avesso peluciado.
+- Em dúvida entre duas opções, escolha a que melhor respeita a ESTRUTURA (malha vs plano) e reduza a confiança.`;
+
+    const taxonomyReference = `CATÁLOGO DE REFERÊNCIA (avaliar candidatos):
+- MALHAS: helanca/helanquinha, malha poliéster com elastano, viscolycra, suplex, meia malha, ribana, moletinho, moletom.
+- PLANOS LEVES: viscose, viscose digital, crepe de viscose, crepe georgette, chiffon, tricoline leve.
+- PLANOS ESTRUTURADOS: bengaline, sarja, brim, gabardine, oxford.
+- ESPECIAIS: cetim, neoprene, tule, renda.
+
+Para estampas digitais vibrantes com fundo escuro e caimento fluido, considere prioritariamente viscose digital/crepe de viscose, desde que a estrutura NÃO seja malha.`;
+
+    const responseSchema = `Responda APENAS em JSON válido, sem markdown:
 {
-  "nome": "Nome do Tecido",
-  "composicao": "Composição provável",
-  "caimento": "Tipo de caimento observado",
-  "elasticidade": "Nível de elasticidade",
-  "dificuldade": "Fácil/Médio/Avançado",
-  "roupas": "Tipo de peça identificada e outras peças ideais para esse tecido",
-  "forro": "Se a peça aparenta ter forro e recomendação",
-  "agulha": "Agulha recomendada",
-  "linha": "Linha recomendada",
-  "confianca": "Alta/Média/Baixa",
-  "observacoes": "Detalhes extras sobre o tecido observado na peça, dicas para reproduzir"
-}`
-      : `Você é um especialista em tecidos e costura. Analise a imagem do tecido enviada e identifique:
-
-1. O nome do tecido (seja específico, ex: Crepe, Viscose, Cetim, Malha, Tricoline, Oxford, Linho, Seda, Chiffon, Organza, Tule, Jeans/Denim, Moletom, Neoprene, Renda, Jacquard, Brim, Sarja, Popeline, Gabardine, Cambraia, Musseline, Tafetá, Veludo, Suede, etc.)
-2. A composição provável
-3. O tipo de caimento
-4. O nível de elasticidade
-5. A dificuldade de costura
-6. Roupas ideais para esse tecido
-7. Se precisa de forro
-8. Agulha recomendada
-9. Linha recomendada
-
-Responda APENAS em formato JSON válido, sem markdown, sem código, apenas o JSON puro:
-{
-  "nome": "Nome do Tecido",
+  "nome": "Nome do tecido",
   "composicao": "Composição provável",
   "caimento": "Tipo de caimento",
   "elasticidade": "Nível de elasticidade",
   "dificuldade": "Fácil/Médio/Avançado",
-  "roupas": "Lista de roupas ideais",
-  "forro": "Se precisa de forro ou não",
+  "roupas": "Peças ideais/uso principal",
+  "forro": "Se precisa de forro ou se é usado como forro",
   "agulha": "Agulha recomendada",
   "linha": "Linha recomendada",
   "confianca": "Alta/Média/Baixa",
-  "observacoes": "Observações extras sobre o tecido"
+  "observacoes": "Explique brevemente os sinais visuais que sustentam a decisão"
 }`;
 
-    const userText = isRoupa
-      ? "Identifique o tecido desta roupa pronta. Analise o caimento, brilho, textura e estrutura do tecido na peça."
-      : "Identifique este tecido na imagem. Analise a textura, brilho, transparência, trama e aparência geral.";
+    const systemPrompt = isGarmentMode
+      ? `Você é um especialista têxtil sênior em identificação por imagem de ROUPA PRONTA.
+
+${mandatoryProtocol}
+
+${taxonomyReference}
+
+Ao analisar roupa pronta, observe: área de costura, dobras, recuperação após tensão, brilho, espessura, transparência e comportamento do forro quando visível.${feedbackInstruction}
+
+Identifique o tecido principal da peça e possíveis misturas/composição. Se o tecido principal não estiver totalmente visível, declare incerteza em "confianca" e explique em "observacoes".
+
+${responseSchema}`
+      : `Você é um especialista têxtil sênior em identificação por imagem de TECIDO (amostra/foto aproximada).
+
+${mandatoryProtocol}
+
+${taxonomyReference}
+
+Para foto de tecido, dê peso alto a: construção (malha x plano), presença de laçadas, borda cortada, nível real de desfiamento, granulação de superfície (crepe), transparência e resposta da dobra.${feedbackInstruction}
+
+Se detectar padrão típico de forro elástico fino, prefira classificar como malha de forro (ex: helanquinha) em vez de tecidos planos fluidos.
+
+${responseSchema}`;
+
+    const userText = isGarmentMode
+      ? "Identifique o tecido desta roupa pronta seguindo o protocolo: primeiro estrutura (malha ou tecido plano), depois tipo específico e composição."
+      : "Identifique o tecido da imagem seguindo o protocolo: primeiro estrutura (malha ou tecido plano), depois tipo específico (ex: helanquinha, crepe, viscose, bengaline).";
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -95,20 +118,14 @@ Responda APENAS em formato JSON válido, sem markdown, sem código, apenas o JSO
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-2.5-pro",
         messages: [
           { role: "system", content: systemPrompt },
           {
             role: "user",
             content: [
-              {
-                type: "text",
-                text: userText,
-              },
-              {
-                type: "image_url",
-                image_url: { url: imageBase64 },
-              },
+              { type: "text", text: userText },
+              { type: "image_url", image_url: { url: imageBase64 } },
             ],
           },
         ],
@@ -128,6 +145,7 @@ Responda APENAS em formato JSON válido, sem markdown, sem código, apenas o JSO
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
+
       const errorText = await response.text();
       console.error("AI gateway error:", response.status, errorText);
       throw new Error(`AI gateway error: ${response.status}`);
@@ -140,54 +158,50 @@ Responda APENAS em formato JSON válido, sem markdown, sem código, apenas o JSO
       throw new Error("No response from AI");
     }
 
-    // Parse the JSON from the AI response
     let fabricInfo;
     try {
       const jsonMatch = content.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error("No JSON found in response");
-      
+
       let jsonStr = jsonMatch[0];
-      // Fix unescaped quotes inside string values by replacing inner quotes
-      // First try direct parse
       try {
         fabricInfo = JSON.parse(jsonStr);
       } catch {
-        // Remove control characters and fix common JSON issues
         jsonStr = jsonStr
-          .replace(/[\x00-\x1F\x7F]/g, (ch) => ch === '\n' || ch === '\r' || ch === '\t' ? ch : '')
-          .replace(/\n/g, ' ')
-          .replace(/\r/g, '')
-          .replace(/\t/g, ' ');
-        
-        // Try to extract values manually if JSON.parse still fails
+          .replace(/[\x00-\x1F\x7F]/g, (ch: string) => (ch === "\n" || ch === "\r" || ch === "\t" ? ch : ""))
+          .replace(/\n/g, " ")
+          .replace(/\r/g, "")
+          .replace(/\t/g, " ");
+
         try {
           fabricInfo = JSON.parse(jsonStr);
         } catch {
-          // Last resort: extract key-value pairs with regex
           const extract = (key: string): string => {
-            const re = new RegExp(`"${key}"\\s*:\\s*"((?:[^"\\\\]|\\\\.|"(?!\\s*[,}]))*)"`, 's');
+            const re = new RegExp(`"${key}"\\s*:\\s*"((?:[^"\\\\]|\\\\.|"(?!\\s*[,}]))*)"`, "s");
             const m = jsonStr.match(re);
-            return m ? m[1].replace(/"/g, '') : '';
+            return m ? m[1].replace(/"/g, "") : "";
           };
+
           fabricInfo = {
-            nome: extract('nome'),
-            composicao: extract('composicao'),
-            caimento: extract('caimento'),
-            elasticidade: extract('elasticidade'),
-            dificuldade: extract('dificuldade'),
-            roupas: extract('roupas'),
-            forro: extract('forro'),
-            agulha: extract('agulha'),
-            linha: extract('linha'),
-            confianca: extract('confianca'),
-            observacoes: extract('observacoes'),
+            nome: extract("nome"),
+            composicao: extract("composicao"),
+            caimento: extract("caimento"),
+            elasticidade: extract("elasticidade"),
+            dificuldade: extract("dificuldade"),
+            roupas: extract("roupas"),
+            forro: extract("forro"),
+            agulha: extract("agulha"),
+            linha: extract("linha"),
+            confianca: extract("confianca"),
+            observacoes: extract("observacoes"),
           };
+
           if (!fabricInfo.nome) {
             throw new Error("Could not extract fabric name");
           }
         }
       }
-    } catch (parseError) {
+    } catch {
       console.error("Failed to parse AI response:", content);
       throw new Error("Failed to parse fabric identification");
     }
@@ -202,7 +216,7 @@ Responda APENAS em formato JSON válido, sem markdown, sem código, apenas o JSO
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      },
     );
   }
 });
