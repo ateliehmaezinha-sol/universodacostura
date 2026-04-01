@@ -22,51 +22,46 @@ serve(async (req) => {
       );
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
+    const GOOGLE_GEMINI_API_KEY = Deno.env.get("GOOGLE_GEMINI_API_KEY");
+    if (!GOOGLE_GEMINI_API_KEY) {
       return new Response(
-        JSON.stringify({ error: "LOVABLE_API_KEY is not configured" }),
+        JSON.stringify({ error: "GOOGLE_GEMINI_API_KEY não está configurada" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const userContent: any[] = [
-      {
-        type: "text",
-        text: `You are a fashion designer AI. Generate a realistic, professional fashion photo of the following clothing item: "${prompt}". 
-The garment should use the fabric/texture shown in the reference image. 
+    const textPrompt = `You are a fashion designer AI. Generate a realistic, professional fashion photo of the following clothing item: "${prompt}". 
+The garment should use the fabric/texture shown in the reference image if provided. 
 Show the complete outfit on a mannequin or fashion model silhouette against a clean studio background. 
 Make it look like a professional fashion catalog photo with good lighting and realistic fabric draping.
-The image should be photorealistic and high quality.`,
-      },
-    ];
+The image should be photorealistic and high quality.`;
+
+    const parts: any[] = [{ text: textPrompt }];
 
     if (fabricImageBase64) {
-      userContent.push({
-        type: "image_url",
-        image_url: {
-          url: fabricImageBase64,
-        },
-      });
+      // Extract base64 data and mime type
+      const match = fabricImageBase64.match(/^data:(image\/\w+);base64,(.+)$/);
+      if (match) {
+        parts.push({
+          inlineData: {
+            mimeType: match[1],
+            data: match[2],
+          },
+        });
+      }
     }
 
     const response = await fetch(
-      "https://ai.gateway.lovable.dev/v1/chat/completions",
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GOOGLE_GEMINI_API_KEY}`,
       {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash-image",
-          messages: [
-            {
-              role: "user",
-              content: userContent,
-            },
-          ],
-          modalities: ["image", "text"],
+          contents: [{ role: "user", parts }],
+          generationConfig: {
+            temperature: 0.9,
+            maxOutputTokens: 2048,
+          },
         }),
       }
     );
@@ -78,23 +73,38 @@ The image should be photorealistic and high quality.`,
           { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      if (response.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "Créditos insuficientes. Adicione créditos ao seu workspace." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
       const errorText = await response.text();
-      console.error("AI Gateway error:", response.status, errorText);
+      console.error("Gemini API error:", response.status, errorText);
       return new Response(
-        JSON.stringify({ error: "Erro ao gerar imagem. Tente novamente." }),
+        JSON.stringify({ error: "Erro ao gerar. Tente novamente." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     const data = await response.json();
-    const imageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
-    const textContent = data.choices?.[0]?.message?.content || "";
+    const candidate = data.candidates?.[0]?.content?.parts;
+    
+    let imageUrl: string | null = null;
+    let textContent = "";
+
+    if (candidate) {
+      for (const part of candidate) {
+        if (part.inlineData) {
+          imageUrl = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+        }
+        if (part.text) {
+          textContent += part.text;
+        }
+      }
+    }
+
+    // If no image was generated, return the text description
+    if (!imageUrl && textContent) {
+      return new Response(
+        JSON.stringify({ description: textContent, imageUrl: null, publicImageUrl: null }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     if (!imageUrl) {
       return new Response(
@@ -103,25 +113,20 @@ The image should be photorealistic and high quality.`,
       );
     }
 
-    // Upload base64 image to storage for public URL (for WhatsApp sharing)
+    // Upload to storage for public URL
     let publicImageUrl: string | null = null;
     try {
       const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
       const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
       const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
-      // Decode base64 data URL to binary
       const base64Data = imageUrl.replace(/^data:image\/\w+;base64,/, "");
       const binaryData = Uint8Array.from(atob(base64Data), (c) => c.charCodeAt(0));
-      
       const fileName = `criacao-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.png`;
 
       const { error: uploadError } = await supabaseAdmin.storage
         .from("generated-images")
-        .upload(fileName, binaryData, {
-          contentType: "image/png",
-          upsert: false,
-        });
+        .upload(fileName, binaryData, { contentType: "image/png", upsert: false });
 
       if (!uploadError) {
         const { data: urlData } = supabaseAdmin.storage
