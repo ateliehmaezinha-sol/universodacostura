@@ -1,6 +1,7 @@
 import { ReactNode, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Home, Calculator, Camera, Palette, Lightbulb, Users,
   DollarSign, GraduationCap, MessageCircle, Menu, X, LogOut, Scissors, ShoppingBag
