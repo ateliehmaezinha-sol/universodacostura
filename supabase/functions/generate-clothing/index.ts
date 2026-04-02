@@ -132,7 +132,7 @@ The image should be photorealistic and high quality.`;
   } catch (error) {
     console.error("generate-clothing error:", error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Erro desconhecido" }),
+      JSON.stringify({ error: "Erro ao processar. Tente novamente." }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

@@ -125,7 +125,7 @@ Calcule a quantidade de tecido necessária e recomende os melhores tecidos.`;
   } catch (error) {
     console.error("calculate-fabric error:", error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Erro desconhecido" }),
+      JSON.stringify({ error: "Erro ao processar. Tente novamente." }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

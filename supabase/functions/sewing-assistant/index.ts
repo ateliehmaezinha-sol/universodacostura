@@ -98,7 +98,30 @@ serve(async (req) => {
   }
 
   try {
-    const { messages } = await req.json();
+    const body = await req.json();
+    const { messages } = body;
+
+    if (!Array.isArray(messages) || messages.length === 0) {
+      return new Response(
+        JSON.stringify({ error: "Mensagens são obrigatórias" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Limit message count to prevent abuse
+    const recentMessages = messages.slice(-20);
+
+    // Validate each message has required fields
+    const validMessages = recentMessages.filter(
+      (m: any) => m && typeof m.role === "string" && typeof m.content === "string" && m.content.length <= 5000
+    );
+
+    if (validMessages.length === 0) {
+      return new Response(
+        JSON.stringify({ error: "Mensagens inválidas" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -111,7 +134,7 @@ serve(async (req) => {
 
     const aiMessages = [
       { role: "system", content: systemPrompt },
-      ...messages,
+      ...validMessages,
     ];
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -155,7 +178,7 @@ serve(async (req) => {
   } catch (error) {
     console.error("sewing-assistant error:", error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Erro desconhecido" }),
+      JSON.stringify({ error: "Erro ao processar. Tente novamente." }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

@@ -212,7 +212,7 @@ ${responseSchema}`;
   } catch (e) {
     console.error("identify-fabric error:", e);
     return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : "Erro ao identificar tecido" }),
+      JSON.stringify({ error: "Erro ao identificar tecido. Tente novamente." }),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
