@@ -28,7 +28,7 @@ export default function Dashboard() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-display font-bold">
-            Olá, <span className="gold-gradient-text">{user.nome?.split(" ")[0] || "Costureira"}</span> ✨
+            Olá, <span className="gold-gradient-text">{userName.split(" ")[0]}</span> ✨
           </h1>
           <p className="text-muted-foreground mt-2">O que vamos criar hoje?</p>
         </div>
