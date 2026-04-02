@@ -22,10 +22,11 @@ serve(async (req) => {
       );
     }
 
-    const GOOGLE_GEMINI_API_KEY = Deno.env.get("GOOGLE_GEMINI_API_KEY");
-    if (!GOOGLE_GEMINI_API_KEY) {
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      console.error("LOVABLE_API_KEY not configured");
       return new Response(
-        JSON.stringify({ error: "GOOGLE_GEMINI_API_KEY não está configurada" }),
+        JSON.stringify({ error: "Chave de API não configurada" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -36,45 +37,37 @@ Show the complete outfit on a mannequin or fashion model silhouette against a cl
 Make it look like a professional fashion catalog photo with good lighting and realistic fabric draping.
 The image should be photorealistic and high quality.`;
 
-    const parts: any[] = [{ text: textPrompt }];
+    const content: any[] = [{ type: "text", text: textPrompt }];
 
     if (fabricImageBase64) {
-      // Extract base64 data and mime type
-      const match = fabricImageBase64.match(/^data:(image\/\w+);base64,(.+)$/);
-      if (match) {
-        parts.push({
-          inlineData: {
-            mimeType: match[1],
-            data: match[2],
-          },
-        });
-      }
+      content.push({
+        type: "image_url",
+        image_url: { url: fabricImageBase64 },
+      });
     }
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GOOGLE_GEMINI_API_KEY}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ role: "user", parts }],
-          generationConfig: {
-            temperature: 0.9,
-            maxOutputTokens: 2048,
-          },
-        }),
-      }
-    );
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash-image",
+        messages: [{ role: "user", content }],
+        modalities: ["image", "text"],
+      }),
+    });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error("AI Gateway error:", response.status, errorText);
       if (response.status === 429) {
         return new Response(
           JSON.stringify({ error: "Limite de requisições excedido. Tente novamente em alguns instantes." }),
           { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      const errorText = await response.text();
-      console.error("Gemini API error:", response.status, errorText);
       return new Response(
         JSON.stringify({ error: "Erro ao gerar. Tente novamente." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -82,23 +75,15 @@ The image should be photorealistic and high quality.`;
     }
 
     const data = await response.json();
-    const candidate = data.candidates?.[0]?.content?.parts;
-    
-    let imageUrl: string | null = null;
-    let textContent = "";
+    const choice = data.choices?.[0]?.message;
 
-    if (candidate) {
-      for (const part of candidate) {
-        if (part.inlineData) {
-          imageUrl = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
-        }
-        if (part.text) {
-          textContent += part.text;
-        }
-      }
+    let imageUrl: string | null = null;
+    let textContent = choice?.content || "";
+
+    if (choice?.images?.length > 0) {
+      imageUrl = choice.images[0].image_url.url;
     }
 
-    // If no image was generated, return the text description
     if (!imageUrl && textContent) {
       return new Response(
         JSON.stringify({ description: textContent, imageUrl: null, publicImageUrl: null }),
