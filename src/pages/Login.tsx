@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
 
 const estados = [
   "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA",
@@ -22,6 +23,7 @@ export default function Login() {
   const [isRegister, setIsRegister] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ nome: "", email: "", senha: "", cidade: "", estado: "", profissao: "" });
+  const [showPassword, setShowPassword] = useState(false);
 
   if (loading) {
     return (
@@ -121,7 +123,12 @@ export default function Login() {
 
           <div className="space-y-2">
             <Label htmlFor="senha">Senha</Label>
-            <Input id="senha" type="password" placeholder="Sua senha" value={form.senha} onChange={(e) => setForm({ ...form, senha: e.target.value })} required minLength={6} />
+            <div className="relative">
+              <Input id="senha" type={showPassword ? "text" : "password"} placeholder="Sua senha" value={form.senha} onChange={(e) => setForm({ ...form, senha: e.target.value })} required minLength={6} className="pr-10" />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
 
           {isRegister && (
