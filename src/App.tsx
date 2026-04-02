@@ -2,7 +2,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/contexts/AuthContext";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Calculadora from "./pages/Calculadora";
@@ -26,22 +28,24 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/calculadora" element={<Calculadora />} />
-          <Route path="/identificador" element={<Identificador />} />
-          <Route path="/criador" element={<Criador />} />
-          <Route path="/tecidos" element={<Tecidos />} />
-          <Route path="/ideias" element={<Ideias />} />
-          <Route path="/clientes" element={<Clientes />} />
-          <Route path="/financeiro" element={<Financeiro />} />
-          <Route path="/cursos" element={<Cursos />} />
-          <Route path="/assistente" element={<Assistente />} />
-          <Route path="/loja" element={<Loja />} />
-          <Route path="/quiz" element={<QuizFunil />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            <Route path="/" element={<Login />} />
+            <Route path="/quiz" element={<QuizFunil />} />
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/calculadora" element={<ProtectedRoute><Calculadora /></ProtectedRoute>} />
+            <Route path="/identificador" element={<ProtectedRoute><Identificador /></ProtectedRoute>} />
+            <Route path="/criador" element={<ProtectedRoute><Criador /></ProtectedRoute>} />
+            <Route path="/tecidos" element={<ProtectedRoute><Tecidos /></ProtectedRoute>} />
+            <Route path="/ideias" element={<ProtectedRoute><Ideias /></ProtectedRoute>} />
+            <Route path="/clientes" element={<ProtectedRoute><Clientes /></ProtectedRoute>} />
+            <Route path="/financeiro" element={<ProtectedRoute><Financeiro /></ProtectedRoute>} />
+            <Route path="/cursos" element={<ProtectedRoute><Cursos /></ProtectedRoute>} />
+            <Route path="/assistente" element={<ProtectedRoute><Assistente /></ProtectedRoute>} />
+            <Route path="/loja" element={<ProtectedRoute><Loja /></ProtectedRoute>} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
