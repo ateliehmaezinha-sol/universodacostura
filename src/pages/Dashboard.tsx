@@ -19,7 +19,8 @@ const features = [
 ];
 
 export default function Dashboard() {
-  const user = JSON.parse(localStorage.getItem("atelie_user") || '{"nome":"Costureira"}');
+  const { user } = useAuth();
+  const userName = user?.user_metadata?.nome || user?.email || "Costureira";
 
   return (
     <AppLayout>

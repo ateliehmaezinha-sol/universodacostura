@@ -26,8 +26,10 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    localStorage.removeItem("atelie_user");
+  const { signOut } = useAuth();
+
+  const handleLogout = async () => {
+    await signOut();
     navigate("/");
   };
 
