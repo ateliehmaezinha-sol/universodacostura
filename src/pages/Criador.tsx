@@ -32,6 +32,41 @@ const MODELOS: Record<string, { descricao: string; tecidos: string[]; dicas: str
     tecidos: ["Gabardine", "Oxford", "Linho estruturado"],
     dicas: ["Use entretela em frentes, gola e punhos", "Forre com bemberg ou cetim", "Monte os bolsos antes de unir frente e costas"],
   },
+  "Macacão feminino": {
+    descricao: "**Macacão Feminino**\n\nPeça única que une blusa e calça. Pode ser pantacourt, longo ou curto. Elegante e prático.\n\n📐 **Metragem**: 2,5m a 3,5m de tecido (largura 1,50m)\n\n**Modelagem**: Corpo + calça em peça única, com abertura nas costas ou lateral para vestir.",
+    tecidos: ["Crepe", "Viscose", "Linho", "Alfaiataria leve"],
+    dicas: ["Ajuste bem o gancho — é o ponto mais crítico", "Use zíper invisível nas costas de 50cm", "Faça prova com tecido de teste antes de cortar o definitivo", "Cós embutido na cintura para marcar a silhueta"],
+  },
+  "Vestido de noiva": {
+    descricao: "**Vestido de Noiva**\n\nPeça especial com corpete estruturado, saia ampla (godê ou sereia) e acabamentos nobres. Peça de alta costura.\n\n📐 **Metragem**: 6m a 10m de tecido principal + 4m forro + 2m entretela\n\n**Modelagem**: Corpete com barbatanas, saia separada. Cauda opcional adiciona 1-3m.",
+    tecidos: ["Mikado", "Zibeline", "Renda francesa", "Tule", "Cetim duchesse"],
+    dicas: ["Use barbatanas de aço espiral no corpete", "Forre todo o corpete com cetim", "Monte a saia separada e una ao corpete na cintura", "Faça pelo menos 3 provas durante a confecção", "Cauda: curta (30cm), média (1m), catedral (2-3m)"],
+  },
+  "Jaleco profissional": {
+    descricao: "**Jaleco Profissional**\n\nModelo com gola esporte, manga longa, bolsos frontais e fechamento com botões. Usado por profissionais de saúde e estética.\n\n📐 **Metragem**: 2,0m a 2,5m de tecido (largura 1,50m)\n\n**Modelagem**: Corte reto com pences nas costas para ajuste. Comprimento até o quadril ou meio da coxa.",
+    tecidos: ["Oxford", "Tricoline", "Gabardine leve", "Microfibra"],
+    dicas: ["Use tecido que aceite lavagem a 60°C", "Reforce os bolsos com entretela", "Faça casas de botão reforçadas", "Personalize com nome bordado no bolso superior"],
+  },
+  "Uniforme escolar/trabalho": {
+    descricao: "**Uniforme Profissional ou Escolar**\n\nConjunto padronizado: camisa polo ou social + calça ou saia. Foco em durabilidade e conforto.\n\n📐 **Metragem**: Camisa: 1,5m + Calça: 2,0m = **3,5m total**\n\n**Modelagem**: Corte confortável com folga de movimento. Reforço em pontos de atrito.",
+    tecidos: ["Brim", "Oxford", "Piquet (polo)", "Gabardine", "Helanca (esportivo)"],
+    dicas: ["Use costura dupla em todas as emendas", "Reforce bolsos e joelhos", "Teste o tecido para encolhimento antes de cortar", "Para uniformes em quantidade, faça um molde-piloto e aprove antes de produzir"],
+  },
+  "Vestido infantil": {
+    descricao: "**Vestido Infantil**\n\nModelo com corpete simples e saia rodada. Ideal para festas e uso diário. Tamanhos de 1 a 12 anos.\n\n📐 **Metragem**: 1,0m a 2,0m (varia com idade e modelo)\n\n**Modelagem**: Corpo com pregas ou franzido na cintura. Saia godê ou evasê.",
+    tecidos: ["Tricoline", "Viscose", "Cetim (festa)", "Renda (sobreposição)"],
+    dicas: ["Use tecidos macios e confortáveis", "Evite aviamentos que possam machucar", "Faça a bainha generosa para permitir ajuste de crescimento", "Forre com algodão para contato direto com a pele"],
+  },
+  "Calça pantalona elegante": {
+    descricao: "**Calça Pantalona**\n\nModelo de cintura alta com pernas largas e retas. Elegante e confortável. Ideal para trabalho e eventos.\n\n📐 **Metragem**: 2,5m a 3,0m de tecido (largura 1,50m)\n\n**Modelagem**: Cós alto com pregas frontais, pernas amplas desde o quadril.",
+    tecidos: ["Crepe", "Alfaiataria", "Linho", "Viscose encorpada"],
+    dicas: ["Cós alto com zíper invisível lateral", "Use pregas na frente para caimento elegante", "Comprimento ideal: tocando o chão com salto", "Passe bem as costuras com ferro para vinco perfeito"],
+  },
+  "Cropped fashion": {
+    descricao: "**Cropped Fashion**\n\nBlusa curtinha que termina acima da cintura. Versátil para looks casuais e festivos.\n\n📐 **Metragem**: 0,6m a 0,9m de tecido (largura 1,50m)",
+    tecidos: ["Malha canelada", "Viscose", "Laise", "Crepe"],
+    dicas: ["Use elástico na barra para efeito bufante", "Ótimo para tecidos estampados", "Combine com saia de cintura alta ou pantalona", "Para amarração frontal, adicione 15cm ao comprimento"],
+  },
 };
 
 const sugestoes = Object.keys(MODELOS);
