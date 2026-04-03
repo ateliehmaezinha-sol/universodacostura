@@ -29,83 +29,16 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Prompt is required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    const LOVABLE_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_KEY) {
+      return new Response(JSON.stringify({ error: "Serviço de IA não configurado. Contate o suporte." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     const textPrompt = `You are a fashion designer AI. Generate a realistic, professional fashion photo of the following clothing item: "${prompt}". 
 The garment should use the fabric/texture shown in the reference image if provided. 
 Show the complete outfit on a mannequin or fashion model silhouette against a clean studio background. 
 Make it look like a professional fashion catalog photo with good lighting and realistic fabric draping.
 The image should be photorealistic and high quality.`;
-
-    // Try Google Gemini first
-    const GEMINI_KEY = Deno.env.get("GOOGLE_GEMINI_API_KEY");
-    const LOVABLE_KEY = Deno.env.get("LOVABLE_API_KEY");
-
-    if (GEMINI_KEY) {
-      try {
-        const parts: any[] = [{ text: textPrompt }];
-        if (fabricImageBase64) {
-          const base64Match = fabricImageBase64.match(/^data:(image\/\w+);base64,(.+)$/);
-          if (base64Match) {
-            parts.push({ inlineData: { mimeType: base64Match[1], data: base64Match[2] } });
-          }
-        }
-
-        const geminiResp = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_KEY}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [{ parts }],
-              generationConfig: { responseModalities: ["TEXT", "IMAGE"] },
-            }),
-          }
-        );
-
-        if (geminiResp.ok) {
-          const data = await geminiResp.json();
-          const candidate = data.candidates?.[0]?.content?.parts;
-          let imageUrl: string | null = null;
-          let textContent = "";
-
-          if (candidate) {
-            for (const part of candidate) {
-              if (part.text) textContent += part.text;
-              if (part.inlineData) imageUrl = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
-            }
-          }
-
-          if (imageUrl) {
-            let publicImageUrl: string | null = null;
-            try {
-              const supabaseAdmin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-              const base64Data = imageUrl.replace(/^data:image\/\w+;base64,/, "");
-              const binaryData = Uint8Array.from(atob(base64Data), (c) => c.charCodeAt(0));
-              const fileName = `criacao-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.png`;
-              const { error: uploadError } = await supabaseAdmin.storage.from("generated-images").upload(fileName, binaryData, { contentType: "image/png", upsert: false });
-              if (!uploadError) {
-                const { data: urlData } = supabaseAdmin.storage.from("generated-images").getPublicUrl(fileName);
-                publicImageUrl = urlData.publicUrl;
-              }
-            } catch (e) { console.error("Upload error:", e); }
-
-            return new Response(JSON.stringify({ imageUrl, publicImageUrl, description: textContent }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
-          }
-
-          if (textContent) {
-            return new Response(JSON.stringify({ description: textContent, imageUrl: null, publicImageUrl: null }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
-          }
-        }
-        const errText = await geminiResp.text();
-        console.error("Gemini failed, falling back:", geminiResp.status, errText);
-      } catch (e) {
-        console.error("Gemini error, falling back:", e);
-      }
-    }
-
-    // Fallback to Lovable AI Gateway
-    if (!LOVABLE_KEY) {
-      return new Response(JSON.stringify({ error: "Nenhuma API de IA configurada" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    }
 
     const content: any[] = [{ type: "text", text: textPrompt }];
     if (fabricImageBase64) {
@@ -119,7 +52,7 @@ The image should be photorealistic and high quality.`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-image",
+        model: "google/gemini-3.1-flash-image-preview",
         messages: [{ role: "user", content }],
         modalities: ["image", "text"],
       }),
@@ -127,7 +60,13 @@ The image should be photorealistic and high quality.`;
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Lovable AI error:", response.status, errorText);
+      console.error("AI error:", response.status, errorText);
+      if (response.status === 402) {
+        return new Response(JSON.stringify({ error: "Limite mensal de IA atingido. Tente novamente no próximo mês ou contate o suporte." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      if (response.status === 429) {
+        return new Response(JSON.stringify({ error: "Muitas solicitações. Aguarde alguns segundos e tente novamente." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
       return new Response(JSON.stringify({ error: "Erro ao gerar. Tente novamente." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 

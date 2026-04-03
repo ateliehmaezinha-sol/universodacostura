@@ -88,44 +88,9 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Mensagens inválidas" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Try Google Gemini first, fall back to Lovable AI Gateway
-    const GEMINI_KEY = Deno.env.get("GOOGLE_GEMINI_API_KEY");
     const LOVABLE_KEY = Deno.env.get("LOVABLE_API_KEY");
-
-    if (GEMINI_KEY) {
-      try {
-        const geminiContents = validMessages.map((msg: any) => ({
-          role: msg.role === "assistant" ? "model" : "user",
-          parts: [{ text: msg.content }],
-        }));
-
-        const geminiResp = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              systemInstruction: { parts: [{ text: systemPrompt }] },
-              contents: geminiContents,
-            }),
-          }
-        );
-
-        if (geminiResp.ok) {
-          const data = await geminiResp.json();
-          const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Desculpe, não consegui gerar uma resposta.";
-          return new Response(JSON.stringify({ response: text }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
-        }
-        const errText = await geminiResp.text();
-        console.error("Gemini failed, falling back:", geminiResp.status, errText);
-      } catch (e) {
-        console.error("Gemini error, falling back:", e);
-      }
-    }
-
-    // Fallback to Lovable AI Gateway
     if (!LOVABLE_KEY) {
-      return new Response(JSON.stringify({ error: "Nenhuma API de IA configurada" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return new Response(JSON.stringify({ error: "Serviço de IA não configurado. Contate o suporte." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const aiMessages = [{ role: "system", content: systemPrompt }, ...validMessages];
@@ -144,7 +109,13 @@ serve(async (req) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Lovable AI error:", response.status, errorText);
+      console.error("AI error:", response.status, errorText);
+      if (response.status === 402) {
+        return new Response(JSON.stringify({ error: "Limite mensal de IA atingido. Tente novamente no próximo mês ou contate o suporte." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      if (response.status === 429) {
+        return new Response(JSON.stringify({ error: "Muitas solicitações. Aguarde alguns segundos e tente novamente." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
       return new Response(JSON.stringify({ error: "Erro ao processar. Tente novamente." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
