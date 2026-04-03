@@ -17,81 +17,46 @@ Você é especialista em:
 
 ## CONHECIMENTO TÉCNICO DE CÁLCULO DE TECIDO (largura padrão 1,40m a 1,50m)
 
-### SAIAS (baseado em medidas sob medida)
-- **Saia Reta/Lápis**: comprimento desejado + 20cm (margem costura/barra). ~0,80m a 1,00m
+### SAIAS
+- **Saia Reta/Lápis**: comprimento desejado + 20cm. ~0,80m a 1,00m
 - **Saia Evasê (leve godê)**: comprimento × 1,5 + 20cm. ~1,20m a 1,50m  
 - **Saia Meio Godê**: comprimento × 2 + 20cm. ~1,50m a 2,00m
 - **Saia Godê Total (circular)**: comprimento × 3 + 30cm. ~2,50m a 3,50m
-- **Saia Midi Plissada**: comprimento × 3. ~2,50m a 3,00m
 
 ### VESTIDOS
-- **Vestido Tubinho (reto/justo)**: comprimento total + 30cm. ~1,50m a 1,80m
-- **Vestido Evasê**: corpo (50cm) + saia evasê. ~2,00m a 2,50m
-- **Vestido com Saia Meio Godê**: corpo + saia meio godê. ~2,50m a 3,00m
-- **Vestido com Saia Godê Total**: corpo + saia godê. ~3,50m a 4,50m
-- **Vestido Longo Reto**: ~2,50m a 3,00m
-- **Vestido Longo Evasê**: ~3,00m a 3,50m
-- **Vestido Longo Meio Godê**: ~3,50m a 4,00m
+- **Vestido Tubinho**: comprimento total + 30cm. ~1,50m a 1,80m
+- **Vestido Evasê**: corpo + saia evasê. ~2,00m a 2,50m
+- **Vestido Meio Godê**: corpo + saia meio godê. ~2,50m a 3,00m
+- **Vestido Godê Total**: corpo + saia godê. ~3,50m a 4,50m
 - **Vestido Longo Godê Total**: ~4,50m a 6,00m
-- **Vestido de Noiva (com cauda)**: ~6,00m a 12,00m dependendo da cauda
 
-### BLUSAS E TOPS
-- **Blusa básica manga curta**: ~1,20m a 1,50m
+### BLUSAS
+- **Blusa manga curta**: ~1,20m a 1,50m
 - **Blusa manga longa**: ~1,50m a 1,80m
-- **Blusa ciganinha**: ~1,50m a 2,00m (mais tecido para o franzido)
 - **Cropped**: ~0,60m a 0,80m
-- **Regata**: ~0,80m a 1,00m
 
 ### CALÇAS
 - **Calça reta/skinny**: comprimento × 2 + 30cm. ~1,50m a 1,80m
 - **Calça pantalona**: comprimento × 2 + 50cm. ~2,00m a 2,50m
-- **Calça palazzo**: ~2,50m a 3,00m
-- **Bermuda**: ~1,00m a 1,20m
 
-### BLAZER E CASACOS
-- **Blazer curto**: ~1,50m a 1,80m (+ forro mesma metragem)
+### BLAZER
+- **Blazer curto**: ~1,50m a 1,80m (+ forro)
 - **Blazer longo**: ~2,00m a 2,50m (+ forro)
-- **Casaco/Sobretudo**: ~2,50m a 3,50m (+ forro)
-- **Colete**: ~0,80m a 1,20m
 
-### MACACÕES E CONJUNTOS
-- **Macacão curto**: ~1,80m a 2,00m
-- **Macacão longo reto**: ~2,50m a 3,00m
-- **Macacão longo pantalona**: ~3,00m a 3,50m
-- **Conjunto saia e blusa**: somar individual de cada peça
+## TIPOS DE GODÊ
+| Tipo | Tecido Extra | Efeito |
+|------|-------------|--------|
+| **Evasê** | +30-50% | Levemente soltinho |
+| **Meio Godê** | +100% | Balanço moderado |
+| **Godê Total** | +200-300% | Muito rodado |
 
-### AJUSTES POR MEDIDAS
-- Para quadril acima de 110cm: acrescentar 20-30cm extra
-- Para busto acima de 110cm: acrescentar 15-20cm extra
-- Para altura acima de 170cm: acrescentar 15-20cm extra por peça
-- Tecidos com estampa que precisa de encaixe: acrescentar 30-50cm extra
-- Tecidos listrados/xadrez na diagonal: acrescentar 50% extra
-
-## TIPOS DE GODÊ (IMPORTANTE)
-Quando perguntarem sobre godê, SEMPRE explique as variações:
-
-| Tipo | Abertura | Tecido Extra | Efeito |
-|------|----------|-------------|--------|
-| **Evasê (leve godê)** | Sutil, ~30° | +30-50% do comprimento | Levemente soltinho, elegante |
-| **Meio Godê** | Moderada, ~180° | +100% do comprimento | Bonito caimento, balanço moderado |
-| **Godê Total (circular)** | Total, 360° | +200-300% do comprimento | Muito rodado, volumoso, dramático |
-
-## TECIDOS RECOMENDADOS POR PEÇA
-- **Vestidos de festa**: Crepe, cetim, musseline, chiffon, renda
-- **Vestidos casuais**: Viscose, malha, linho, algodão
-- **Saias godê**: Crepe, viscose, chiffon (tecidos com bom caimento)
-- **Blazer**: Gabardine, oxford, linho estruturado, alfaiataria
-- **Calças**: Bengaline, alfaiataria, jeans, sarja
-- **Blusas**: Viscose, crepe, seda, musseline
-
-## REGRAS DE RESPOSTA
-1. Quando receber medidas específicas (busto, cintura, quadril), calcule com base nelas
-2. SEMPRE mostre as variações de godê quando relevante
+## REGRAS
+1. Calcule com base nas medidas quando fornecidas
+2. Mostre variações de godê quando relevante
 3. Recomende 2-3 tecidos ideais
-4. Dê dica de forro quando aplicável
-5. Use emojis para organizar (📐 ✂️ 🧵 💡)
-6. Seja prática e direta como uma costureira experiente
-7. Formate com markdown para boa leitura`;
+4. Use emojis (📐 ✂️ 🧵 💡)
+5. Seja prática e direta
+6. Formate com markdown`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -109,87 +74,86 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Não autorizado" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const body = await req.json();
-    const { messages } = body;
+    const { messages } = await req.json();
 
     if (!Array.isArray(messages) || messages.length === 0) {
-      return new Response(
-        JSON.stringify({ error: "Mensagens são obrigatórias" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "Mensagens são obrigatórias" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const recentMessages = messages.slice(-20);
-    const validMessages = recentMessages.filter(
+    const validMessages = messages.slice(-20).filter(
       (m: any) => m && typeof m.role === "string" && typeof m.content === "string" && m.content.length <= 5000
     );
 
     if (validMessages.length === 0) {
-      return new Response(
-        JSON.stringify({ error: "Mensagens inválidas" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "Mensagens inválidas" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const GEMINI_API_KEY = Deno.env.get("GOOGLE_GEMINI_API_KEY");
-    if (!GEMINI_API_KEY) {
-      return new Response(
-        JSON.stringify({ error: "Chave da API Gemini não configurada" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    // Try Google Gemini first, fall back to Lovable AI Gateway
+    const GEMINI_KEY = Deno.env.get("GOOGLE_GEMINI_API_KEY");
+    const LOVABLE_KEY = Deno.env.get("LOVABLE_API_KEY");
 
-    // Convert messages to Gemini format
-    const geminiContents: any[] = [];
-    
-    // Add system instruction separately
-    for (const msg of validMessages) {
-      geminiContents.push({
-        role: msg.role === "assistant" ? "model" : "user",
-        parts: [{ text: msg.content }],
-      });
-    }
+    if (GEMINI_KEY) {
+      try {
+        const geminiContents = validMessages.map((msg: any) => ({
+          role: msg.role === "assistant" ? "model" : "user",
+          parts: [{ text: msg.content }],
+        }));
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: systemPrompt }] },
-          contents: geminiContents,
-        }),
+        const geminiResp = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              systemInstruction: { parts: [{ text: systemPrompt }] },
+              contents: geminiContents,
+            }),
+          }
+        );
+
+        if (geminiResp.ok) {
+          const data = await geminiResp.json();
+          const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Desculpe, não consegui gerar uma resposta.";
+          return new Response(JSON.stringify({ response: text }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+        }
+        const errText = await geminiResp.text();
+        console.error("Gemini failed, falling back:", geminiResp.status, errText);
+      } catch (e) {
+        console.error("Gemini error, falling back:", e);
       }
-    );
+    }
+
+    // Fallback to Lovable AI Gateway
+    if (!LOVABLE_KEY) {
+      return new Response(JSON.stringify({ error: "Nenhuma API de IA configurada" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    const aiMessages = [{ role: "system", content: systemPrompt }, ...validMessages];
+
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-3-flash-preview",
+        messages: aiMessages,
+      }),
+    });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Gemini API error:", response.status, errorText);
-      if (response.status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Limite de requisições excedido. Tente novamente em alguns instantes." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      return new Response(
-        JSON.stringify({ error: "Erro ao processar. Tente novamente." }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      console.error("Lovable AI error:", response.status, errorText);
+      return new Response(JSON.stringify({ error: "Erro ao processar. Tente novamente." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const data = await response.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Desculpe, não consegui gerar uma resposta.";
+    const text = data.choices?.[0]?.message?.content || "Desculpe, não consegui gerar uma resposta.";
 
-    // Return as non-streaming JSON response
-    return new Response(
-      JSON.stringify({ response: text }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ response: text }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (error) {
     console.error("sewing-assistant error:", error);
-    return new Response(
-      JSON.stringify({ error: "Erro ao processar. Tente novamente." }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: "Erro ao processar. Tente novamente." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 });
