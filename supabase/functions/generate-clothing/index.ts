@@ -13,15 +13,13 @@ serve(async (req) => {
   }
 
   try {
-    // Auth check
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Não autorizado" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
     const supabaseAuth = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: authHeader } } });
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await supabaseAuth.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
+    const { data: { user }, error: userError } = await supabaseAuth.auth.getUser();
+    if (userError || !user) {
       return new Response(JSON.stringify({ error: "Não autorizado" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
@@ -34,11 +32,10 @@ serve(async (req) => {
       );
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      console.error("LOVABLE_API_KEY not configured");
+    const GEMINI_API_KEY = Deno.env.get("GOOGLE_GEMINI_API_KEY");
+    if (!GEMINI_API_KEY) {
       return new Response(
-        JSON.stringify({ error: "Chave de API não configurada" }),
+        JSON.stringify({ error: "Chave da API Gemini não configurada" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -49,31 +46,37 @@ Show the complete outfit on a mannequin or fashion model silhouette against a cl
 Make it look like a professional fashion catalog photo with good lighting and realistic fabric draping.
 The image should be photorealistic and high quality.`;
 
-    const content: any[] = [{ type: "text", text: textPrompt }];
+    const parts: any[] = [{ text: textPrompt }];
 
     if (fabricImageBase64) {
-      content.push({
-        type: "image_url",
-        image_url: { url: fabricImageBase64 },
-      });
+      const base64Match = fabricImageBase64.match(/^data:(image\/\w+);base64,(.+)$/);
+      if (base64Match) {
+        parts.push({
+          inlineData: {
+            mimeType: base64Match[1],
+            data: base64Match[2],
+          },
+        });
+      }
     }
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash-image",
-        messages: [{ role: "user", content }],
-        modalities: ["image", "text"],
-      }),
-    });
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts }],
+          generationConfig: {
+            responseModalities: ["TEXT", "IMAGE"],
+          },
+        }),
+      }
+    );
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("AI Gateway error:", response.status, errorText);
+      console.error("Gemini API error:", response.status, errorText);
       if (response.status === 429) {
         return new Response(
           JSON.stringify({ error: "Limite de requisições excedido. Tente novamente em alguns instantes." }),
@@ -87,13 +90,20 @@ The image should be photorealistic and high quality.`;
     }
 
     const data = await response.json();
-    const choice = data.choices?.[0]?.message;
+    const candidate = data.candidates?.[0]?.content?.parts;
 
     let imageUrl: string | null = null;
-    let textContent = choice?.content || "";
+    let textContent = "";
 
-    if (choice?.images?.length > 0) {
-      imageUrl = choice.images[0].image_url.url;
+    if (candidate) {
+      for (const part of candidate) {
+        if (part.text) {
+          textContent += part.text;
+        }
+        if (part.inlineData) {
+          imageUrl = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+        }
+      }
     }
 
     if (!imageUrl && textContent) {
@@ -110,7 +120,7 @@ The image should be photorealistic and high quality.`;
       );
     }
 
-    // Upload to storage for public URL
+    // Upload to storage
     let publicImageUrl: string | null = null;
     try {
       const supabaseUrl = Deno.env.get("SUPABASE_URL")!;

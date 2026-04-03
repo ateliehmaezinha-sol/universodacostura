@@ -21,7 +21,7 @@ Você é especialista em:
 - **Saia Reta/Lápis**: comprimento desejado + 20cm (margem costura/barra). ~0,80m a 1,00m
 - **Saia Evasê (leve godê)**: comprimento × 1,5 + 20cm. ~1,20m a 1,50m  
 - **Saia Meio Godê**: comprimento × 2 + 20cm. ~1,50m a 2,00m
-- **Saia Godê Total (circular)**: comprimento × 3 + 30cm. ~2,50m a 3,50m (pode precisar de mais para quadris maiores)
+- **Saia Godê Total (circular)**: comprimento × 3 + 30cm. ~2,50m a 3,50m
 - **Saia Midi Plissada**: comprimento × 3. ~2,50m a 3,00m
 
 ### VESTIDOS
@@ -99,15 +99,13 @@ serve(async (req) => {
   }
 
   try {
-    // Auth check
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Não autorizado" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
     const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: authHeader } } });
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
       return new Response(JSON.stringify({ error: "Não autorizado" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
@@ -121,10 +119,7 @@ serve(async (req) => {
       );
     }
 
-    // Limit message count to prevent abuse
     const recentMessages = messages.slice(-20);
-
-    // Validate each message has required fields
     const validMessages = recentMessages.filter(
       (m: any) => m && typeof m.role === "string" && typeof m.content === "string" && m.content.length <= 5000
     );
@@ -136,58 +131,60 @@ serve(async (req) => {
       );
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      console.error("LOVABLE_API_KEY not configured");
+    const GEMINI_API_KEY = Deno.env.get("GOOGLE_GEMINI_API_KEY");
+    if (!GEMINI_API_KEY) {
       return new Response(
-        JSON.stringify({ error: "Chave de API não configurada" }),
+        JSON.stringify({ error: "Chave da API Gemini não configurada" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const aiMessages = [
-      { role: "system", content: systemPrompt },
-      ...validMessages,
-    ];
+    // Convert messages to Gemini format
+    const geminiContents: any[] = [];
+    
+    // Add system instruction separately
+    for (const msg of validMessages) {
+      geminiContents.push({
+        role: msg.role === "assistant" ? "model" : "user",
+        parts: [{ text: msg.content }],
+      });
+    }
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: aiMessages,
-        stream: true,
-      }),
-    });
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+          contents: geminiContents,
+        }),
+      }
+    );
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Gemini API error:", response.status, errorText);
       if (response.status === 429) {
         return new Response(
           JSON.stringify({ error: "Limite de requisições excedido. Tente novamente em alguns instantes." }),
           { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      if (response.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "Créditos insuficientes. Adicione créditos ao workspace." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      const errorText = await response.text();
-      console.error("AI Gateway error:", response.status, errorText);
       return new Response(
         JSON.stringify({ error: "Erro ao processar. Tente novamente." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Stream the response directly - it's already in OpenAI SSE format
-    return new Response(response.body, {
-      headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
-    });
+    const data = await response.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Desculpe, não consegui gerar uma resposta.";
+
+    // Return as non-streaming JSON response
+    return new Response(
+      JSON.stringify({ response: text }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   } catch (error) {
     console.error("sewing-assistant error:", error);
     return new Response(
