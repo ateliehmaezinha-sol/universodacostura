@@ -1,125 +1,88 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import AppLayout from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Camera, Sparkles, Download, Loader2, RefreshCw } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { Sparkles, FileText } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
-const sugestoes = [
-  "Crie um vestido elegante drapeado para festa",
-  "Crie uma blusa ciganinha para o verão",
-  "Crie um conjunto saia e blusa evangélico",
-  "Crie uma saia midi evasê elegante",
-  "Crie um blazer feminino de alfaiataria",
-];
+const MODELOS: Record<string, { descricao: string; tecidos: string[]; dicas: string[] }> = {
+  "Vestido elegante drapeado para festa": {
+    descricao: "**Vestido de Festa Drapeado**\n\nModelo longo com drapeado na cintura, decote V e saia fluida. Ideal para eventos formais e formaturas.\n\n📐 **Metragem**: 4,5m a 5,5m de tecido (largura 1,50m)\n\n**Modelagem**: Corte em viés para o corpo, saia godê total para máximo caimento.",
+    tecidos: ["Crepe de seda", "Musseline", "Jersey acetinado"],
+    dicas: ["Faça o drapeado com alfinetes antes de costurar", "Use barbatanas no corpete para sustentação", "Forre com cetim para conforto"],
+  },
+  "Blusa ciganinha para verão": {
+    descricao: "**Blusa Ciganinha**\n\nModelo com ombros de fora, elástico no decote e cintura. Mangas bufantes com elástico nos punhos. Perfeita para o verão.\n\n📐 **Metragem**: 1,5m a 1,8m de tecido (largura 1,50m)",
+    tecidos: ["Viscose estampada", "Tricoline", "Laise"],
+    dicas: ["Use elástico chato de 1cm no decote", "Faça o decote 15cm maior que a medida do ombro", "Franzido generoso nas mangas para efeito bufante"],
+  },
+  "Conjunto saia e blusa evangélico": {
+    descricao: "**Conjunto Evangélico — Saia Midi + Blusa**\n\nSaia midi godê abaixo do joelho com blusa social de manga 3/4. Conjunto elegante e discreto.\n\n📐 **Metragem**: Saia: 2,0m + Blusa: 1,5m = **3,5m total**",
+    tecidos: ["Crepe", "Gabardine leve", "Oxford"],
+    dicas: ["Saia com comprimento 5cm abaixo do joelho", "Blusa com gola padre para elegância", "Use forro na saia se o tecido for claro"],
+  },
+  "Saia midi evasê elegante": {
+    descricao: "**Saia Midi Evasê**\n\nModelo na altura do joelho com corte evasê suave. Versátil para trabalho e lazer.\n\n📐 **Metragem**: 1,2m a 1,5m de tecido (largura 1,50m)",
+    tecidos: ["Crepe", "Sarja", "Linho"],
+    dicas: ["Cós com zíper invisível lateral", "Bainha italiana para acabamento", "Forre se o tecido for fino"],
+  },
+  "Blazer feminino de alfaiataria": {
+    descricao: "**Blazer Feminino de Alfaiataria**\n\nCorte clássico com lapela, dois botões, bolsos embutidos. Peça-chave do guarda-roupa profissional.\n\n📐 **Metragem**: 1,8m tecido principal + 1,8m forro = **3,6m total**",
+    tecidos: ["Gabardine", "Oxford", "Linho estruturado"],
+    dicas: ["Use entretela em frentes, gola e punhos", "Forre com bemberg ou cetim", "Monte os bolsos antes de unir frente e costas"],
+  },
+};
+
+const sugestoes = Object.keys(MODELOS);
 
 export default function Criador() {
-  const [imagem, setImagem] = useState<string | null>(null);
   const [comando, setComando] = useState("");
-  const [gerando, setGerando] = useState(false);
-  const [imagemGerada, setImagemGerada] = useState<string | null>(null);
-  const [descricao, setDescricao] = useState<string | null>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
+  const [resultado, setResultado] = useState<string | null>(null);
 
-  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => setImagem(reader.result as string);
-      reader.readAsDataURL(file);
-    }
-  };
+  const gerar = () => {
+    if (!comando.trim()) return;
 
-  const gerar = async () => {
-    if (!comando) {
-      toast.error("Descreva o que deseja criar");
-      return;
-    }
-
-    setGerando(true);
-    setImagemGerada(null);
-    setDescricao(null);
-
-    try {
-      const { data, error } = await supabase.functions.invoke("generate-clothing", {
-        body: {
-          fabricImageBase64: imagem || undefined,
-          prompt: comando,
-        },
-      });
-
-      if (error) {
-        console.error("Edge function error:", error);
-        toast.error("Erro ao gerar imagem. Tente novamente.");
-        return;
+    // Find best match
+    const q = comando.toLowerCase();
+    let match = Object.entries(MODELOS).find(([key]) => q.includes(key.toLowerCase().split(" ")[0]));
+    
+    if (!match) {
+      // Try keyword matching
+      for (const [key, val] of Object.entries(MODELOS)) {
+        const words = key.toLowerCase().split(" ");
+        if (words.some(w => w.length > 3 && q.includes(w))) {
+          match = [key, val];
+          break;
+        }
       }
-
-      if (data?.error) {
-        toast.error(data.error);
-        return;
-      }
-
-      if (data?.imageUrl) {
-        setImagemGerada(data.imageUrl);
-        setDescricao(data.description || null);
-        toast.success("Criação gerada com sucesso!");
-      } else {
-        toast.error("Não foi possível gerar a imagem. Tente reformular o pedido.");
-      }
-    } catch (err) {
-      console.error("Erro:", err);
-      toast.error("Erro de conexão. Verifique sua internet e tente novamente.");
-    } finally {
-      setGerando(false);
     }
-  };
 
-  const baixarImagem = () => {
-    if (!imagemGerada) return;
-    const link = document.createElement("a");
-    link.href = imagemGerada;
-    link.download = `criacao-${Date.now()}.png`;
-    link.click();
+    if (match) {
+      const [, modelo] = match;
+      const text = `${modelo.descricao}\n\n🧵 **Tecidos Recomendados**:\n${modelo.tecidos.map((t, i) => `${i + 1}. **${t}**`).join("\n")}\n\n✂️ **Dicas de Confecção**:\n${modelo.dicas.map(d => `• ${d}`).join("\n")}`;
+      setResultado(text);
+    } else {
+      setResultado(`✨ **Criação: ${comando}**\n\nPara esta peça, recomendo:\n\n📐 **Passo a passo**:\n1. Tire as medidas: busto, cintura, quadril e comprimento desejado\n2. Escolha um tecido com bom caimento\n3. Faça a modelagem em papel primeiro\n4. Corte com margem de costura de 2cm\n\n🧵 **Tecidos sugeridos**:\n1. **Crepe** — versátil e elegante\n2. **Viscose** — confortável e acessível\n3. **Gabardine** — para peças estruturadas\n\n💡 *Use a aba "Assistente de Costura" para calcular a metragem exata com base nas suas medidas!*`);
+    }
   };
 
   return (
     <AppLayout>
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-3xl font-display font-bold mb-2">🎨 Criador de Roupa</h1>
-        <p className="text-muted-foreground mb-8">Envie a foto do tecido e descreva o que deseja criar</p>
+        <p className="text-muted-foreground mb-8">
+          Selecione um modelo e veja tecidos, metragem e dicas de confecção — 100% offline
+        </p>
 
         <div className="grid md:grid-cols-2 gap-8">
           <div className="space-y-4">
-            <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleUpload} />
-
-            {imagem ? (
-              <div className="relative rounded-2xl overflow-hidden border border-border">
-                <img src={imagem} alt="Tecido" className="w-full h-48 object-cover" />
-                <button
-                  onClick={() => { setImagem(null); setImagemGerada(null); }}
-                  className="absolute top-3 right-3 bg-primary/80 text-primary-foreground rounded-full px-3 py-1 text-xs"
-                >
-                  Trocar
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => fileRef.current?.click()}
-                className="w-full h-48 rounded-2xl border-2 border-dashed border-border bg-card flex flex-col items-center justify-center gap-2 hover:border-accent transition-colors"
-              >
-                <Camera size={40} className="text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">Envie a foto do tecido (opcional)</span>
-              </button>
-            )}
-
             <div className="space-y-2">
               <Input
                 placeholder="Descreva o que quer criar..."
                 value={comando}
                 onChange={(e) => setComando(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && !gerando && gerar()}
+                onKeyDown={(e) => e.key === "Enter" && gerar()}
                 className="h-12 rounded-xl"
               />
             </div>
@@ -128,7 +91,7 @@ export default function Criador() {
               {sugestoes.map((s) => (
                 <button
                   key={s}
-                  onClick={() => setComando(s)}
+                  onClick={() => { setComando(s); }}
                   className="text-xs bg-card border border-border rounded-full px-3 py-1.5 text-muted-foreground hover:text-foreground hover:border-accent transition-colors"
                 >
                   {s}
@@ -138,81 +101,37 @@ export default function Criador() {
 
             <Button
               onClick={gerar}
-              disabled={!comando || gerando}
+              disabled={!comando.trim()}
               className="w-full h-12 bg-accent text-accent-foreground hover:bg-gold-dark rounded-xl disabled:opacity-40"
             >
-              {gerando ? (
-                <>
-                  <Loader2 size={18} className="mr-2 animate-spin" /> Gerando com IA...
-                </>
-              ) : (
-                <>
-                  <Sparkles size={18} className="mr-2" /> Gerar Criação
-                </>
-              )}
+              <Sparkles size={18} className="mr-2" /> Gerar Criação
             </Button>
 
             <p className="text-xs text-muted-foreground text-center">
-              ✨ Geração de imagens com IA — descreva a roupa e veja a magia acontecer
+              ✨ Modelos com metragem, tecidos recomendados e dicas de confecção
             </p>
           </div>
 
           <div>
-            {gerando && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="bg-card border border-border rounded-2xl p-8 flex flex-col items-center justify-center h-full min-h-[300px]"
-              >
-                <Loader2 size={48} className="animate-spin text-accent mb-4" />
-                <p className="text-muted-foreground text-sm">Criando sua peça com IA...</p>
-                <p className="text-muted-foreground text-xs mt-1">Isso pode levar alguns segundos</p>
-              </motion.div>
-            )}
-
-            {!gerando && imagemGerada && (
+            {resultado ? (
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="space-y-4"
+                className="bg-card border border-border rounded-2xl p-6"
               >
-                <div className="bg-card border border-border rounded-2xl overflow-hidden">
-                  <img
-                    src={imagemGerada}
-                    alt="Criação gerada por IA"
-                    className="w-full object-contain max-h-[500px]"
-                  />
-                  <div className="p-4 space-y-3">
-                    <h3 className="font-display text-lg font-semibold flex items-center gap-2">
-                      <Sparkles size={18} className="text-accent" />
-                      Criação Pronta!
-                    </h3>
-                    <p className="text-sm font-medium text-primary">{comando}</p>
-                    {descricao && (
-                      <p className="text-xs text-muted-foreground leading-relaxed">{descricao}</p>
-                    )}
-                    <div className="flex gap-2 pt-2">
-                      <Button onClick={baixarImagem} className="flex-1 bg-primary text-primary-foreground rounded-xl">
-                        <Download size={16} className="mr-2" /> Baixar Imagem
-                      </Button>
-                      <Button
-                        onClick={gerar}
-                        variant="outline"
-                        className="rounded-xl"
-                      >
-                        <RefreshCw size={16} className="mr-2" /> Gerar Outra
-                      </Button>
-                    </div>
-                  </div>
+                <h3 className="font-display text-lg font-semibold flex items-center gap-2 mb-4">
+                  <Sparkles size={18} className="text-accent" />
+                  Criação Pronta!
+                </h3>
+                <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_table]:text-xs">
+                  <ReactMarkdown>{resultado}</ReactMarkdown>
                 </div>
               </motion.div>
-            )}
-
-            {!gerando && !imagemGerada && (
+            ) : (
               <div className="bg-card border border-border rounded-2xl p-8 flex flex-col items-center justify-center h-full min-h-[300px] text-center">
-                <Sparkles size={48} className="text-muted-foreground/30 mb-4" />
+                <FileText size={48} className="text-muted-foreground/30 mb-4" />
                 <p className="text-muted-foreground text-sm">Sua criação aparecerá aqui</p>
-                <p className="text-muted-foreground text-xs mt-1">Descreva a peça e clique em "Gerar Criação"</p>
+                <p className="text-muted-foreground text-xs mt-1">Descreva a peça ou escolha uma sugestão</p>
               </div>
             )}
           </div>

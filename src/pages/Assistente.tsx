@@ -5,14 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send, Bot, User, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
-import { supabase } from "@/integrations/supabase/client";
+import { processQuery } from "@/lib/sewingEngine";
 
 interface Msg {
   role: "user" | "assistant";
   content: string;
 }
-
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sewing-assistant`;
 
 const sugestoes = [
   "Quanto de tecido para vestido longo godê total?",
@@ -28,7 +26,7 @@ export default function Assistente() {
     {
       role: "assistant",
       content:
-        "Olá! 👋 Sou a assistente de costura da Sol, com mais de 30 anos de experiência!\n\nPosso te ajudar com:\n- 📐 **Cálculo de tecido** para qualquer peça\n- ✂️ **Tipos de godê** (evasê, meio godê, godê total)\n- 🧵 **Recomendação de tecidos** ideais\n- 💡 **Dicas de costura** e acabamento\n\nPergunte por exemplo: *\"Quanto de tecido para um vestido longo com busto 102, cintura 80 e quadril 104 com saia godê?\"*",
+        "Olá! 👋 Sou a assistente de costura da Sol, com mais de 30 anos de experiência!\n\nPosso te ajudar com:\n- 📐 **Cálculo de tecido** para qualquer peça\n- ✂️ **Tipos de godê** (evasê, meio godê, godê total)\n- 🧵 **Recomendação de tecidos** ideais\n- 💡 **Dicas de costura** e acabamento\n\nPergunte por exemplo: *\"Quanto de tecido para um vestido longo com saia godê?\"*",
     },
   ]);
   const [input, setInput] = useState("");
@@ -41,50 +39,21 @@ export default function Assistente() {
     }
   }, [msgs]);
 
-  const enviar = async (text?: string) => {
+  const enviar = (text?: string) => {
     const message = text || input;
     if (!message.trim() || isLoading) return;
 
     const userMsg: Msg = { role: "user", content: message };
-    const newMsgs = [...msgs, userMsg];
-    setMsgs(newMsgs);
+    setMsgs((prev) => [...prev, userMsg]);
     setInput("");
     setIsLoading(true);
 
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token;
-
-      if (!token) {
-        setMsgs((prev) => [...prev, { role: "assistant", content: "⚠️ Sessão expirada. Faça login novamente." }]);
-        setIsLoading(false);
-        return;
-      }
-
-      const resp = await fetch(CHAT_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ messages: newMsgs }),
-      });
-
-      if (!resp.ok) {
-        const errorData = await resp.json().catch(() => ({}));
-        const errorMsg = errorData.error || "Erro ao conectar com a assistente. Tente novamente.";
-        setMsgs((prev) => [...prev, { role: "assistant", content: `⚠️ ${errorMsg}` }]);
-        setIsLoading(false);
-        return;
-      }
-
-      const data = await resp.json();
-      setMsgs((prev) => [...prev, { role: "assistant", content: data.response || "Desculpe, não consegui gerar uma resposta." }]);
-    } catch {
-      setMsgs((prev) => [...prev, { role: "assistant", content: "⚠️ Erro de conexão. Verifique sua internet e tente novamente." }]);
-    } finally {
+    // Simulate small delay for natural feel
+    setTimeout(() => {
+      const response = processQuery(message);
+      setMsgs((prev) => [...prev, { role: "assistant", content: response }]);
       setIsLoading(false);
-    }
+    }, 400);
   };
 
   return (
@@ -95,11 +64,11 @@ export default function Assistente() {
         className="flex flex-col h-[calc(100vh-8rem)] lg:h-[calc(100vh-4rem)]"
       >
         <h1 className="text-2xl font-display font-bold mb-2">
-          💬 Assistente de Costura IA
+          💬 Assistente de Costura
         </h1>
         <p className="text-xs text-muted-foreground mb-3">
           Pergunte sobre quantidade de tecido, tipos de godê, melhores tecidos e
-          dicas de costura
+          dicas de costura — 100% offline, sem consumir créditos
         </p>
 
         <div
@@ -174,7 +143,7 @@ export default function Assistente() {
 
         <div className="flex gap-2">
           <Input
-            placeholder="Pergunte sobre tecidos, quantidade, godê, preços..."
+            placeholder="Pergunte sobre tecidos, quantidade, godê..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && enviar()}
