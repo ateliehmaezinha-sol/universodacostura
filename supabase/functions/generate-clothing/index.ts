@@ -23,70 +23,66 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Não autorizado" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const { fabricImageBase64, prompt } = await req.json();
+    const { prompt } = await req.json();
 
     if (!prompt) {
-      return new Response(JSON.stringify({ error: "Prompt is required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return new Response(JSON.stringify({ error: "Prompt é obrigatório" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const LOVABLE_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_KEY) {
-      return new Response(JSON.stringify({ error: "Serviço de IA não configurado. Contate o suporte." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const GEMINI_KEY = Deno.env.get("GOOGLE_GEMINI_API_KEY");
+    if (!GEMINI_KEY) {
+      return new Response(JSON.stringify({ error: "Chave da API Gemini não configurada." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const textPrompt = `You are a fashion designer AI. Generate a realistic, professional fashion photo of the following clothing item: "${prompt}". 
-The garment should use the fabric/texture shown in the reference image if provided. 
-Show the complete outfit on a mannequin or fashion model silhouette against a clean studio background. 
-Make it look like a professional fashion catalog photo with good lighting and realistic fabric draping.
-The image should be photorealistic and high quality.`;
+    const textPrompt = `Você é um designer de moda profissional. Gere uma imagem realista e profissional da seguinte peça de roupa: "${prompt}". 
+Mostre a roupa completa em um manequim ou silhueta de modelo contra um fundo limpo de estúdio.
+A imagem deve parecer uma foto profissional de catálogo de moda com boa iluminação e caimento realista do tecido.
+A imagem deve ser fotorrealista e de alta qualidade.`;
 
-    const content: any[] = [{ type: "text", text: textPrompt }];
-    if (fabricImageBase64) {
-      content.push({ type: "image_url", image_url: { url: fabricImageBase64 } });
-    }
-
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3.1-flash-image-preview",
-        messages: [{ role: "user", content }],
-        modalities: ["image", "text"],
-      }),
-    });
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent?key=${GEMINI_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: textPrompt }] }],
+          generationConfig: {
+            responseModalities: ["TEXT", "IMAGE"],
+          },
+        }),
+      }
+    );
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("AI error:", response.status, errorText);
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Limite mensal de IA atingido. Tente novamente no próximo mês ou contate o suporte." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      }
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Muitas solicitações. Aguarde alguns segundos e tente novamente." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-      }
-      return new Response(JSON.stringify({ error: "Erro ao gerar. Tente novamente." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      console.error("Gemini API error:", response.status, errorText);
+      return new Response(JSON.stringify({ error: "Erro ao gerar imagem. Tente novamente." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const data = await response.json();
-    const choice = data.choices?.[0]?.message;
-    let imageUrl: string | null = null;
-    let textContent = choice?.content || "";
+    const parts = data.candidates?.[0]?.content?.parts || [];
+    
+    let imageBase64: string | null = null;
+    let textContent = "";
 
-    if (choice?.images?.length > 0) {
-      imageUrl = choice.images[0].image_url.url;
+    for (const part of parts) {
+      if (part.inlineData) {
+        imageBase64 = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+      }
+      if (part.text) {
+        textContent += part.text;
+      }
     }
 
-    if (!imageUrl) {
+    if (!imageBase64) {
       return new Response(JSON.stringify({ description: textContent, imageUrl: null, publicImageUrl: null }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    // Upload to storage
     let publicImageUrl: string | null = null;
     try {
       const supabaseAdmin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-      const base64Data = imageUrl.replace(/^data:image\/\w+;base64,/, "");
+      const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, "");
       const binaryData = Uint8Array.from(atob(base64Data), (c) => c.charCodeAt(0));
       const fileName = `criacao-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.png`;
       const { error: uploadError } = await supabaseAdmin.storage.from("generated-images").upload(fileName, binaryData, { contentType: "image/png", upsert: false });
@@ -96,7 +92,7 @@ The image should be photorealistic and high quality.`;
       }
     } catch (e) { console.error("Upload error:", e); }
 
-    return new Response(JSON.stringify({ imageUrl, publicImageUrl, description: textContent }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ imageUrl: imageBase64, publicImageUrl, description: textContent }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (error) {
     console.error("generate-clothing error:", error);
     return new Response(JSON.stringify({ error: "Erro ao processar. Tente novamente." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
