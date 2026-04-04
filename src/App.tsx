@@ -19,6 +19,7 @@ import Assistente from "./pages/Assistente";
 import Loja from "./pages/Loja";
 import NotFound from "./pages/NotFound";
 import QuizFunil from "./pages/QuizFunil";
+import WhatsAppButton from "@/components/WhatsAppButton";
 
 const queryClient = new QueryClient();
 
