@@ -29,70 +29,61 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Prompt é obrigatório" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const GEMINI_KEY = Deno.env.get("GOOGLE_GEMINI_API_KEY");
-    if (!GEMINI_KEY) {
-      return new Response(JSON.stringify({ error: "Chave da API Gemini não configurada." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      return new Response(JSON.stringify({ error: "Chave da API não configurada." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const textPrompt = `Você é um designer de moda profissional. Gere uma imagem realista e profissional da seguinte peça de roupa: "${prompt}". 
-Mostre a roupa completa em um manequim ou silhueta de modelo contra um fundo limpo de estúdio.
-A imagem deve parecer uma foto profissional de catálogo de moda com boa iluminação e caimento realista do tecido.
-A imagem deve ser fotorrealista e de alta qualidade.`;
+    const systemPrompt = `Você é uma designer de moda profissional brasileira com 20 anos de experiência. 
+Quando a usuária descreve uma peça de roupa, você deve gerar uma ficha técnica completa e detalhada contendo:
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent?key=${GEMINI_KEY}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: textPrompt }] }],
-          generationConfig: {
-            responseModalities: ["TEXT", "IMAGE"],
-          },
-        }),
-      }
-    );
+1. **Nome da peça** e descrição visual detalhada (silhueta, comprimento, detalhes)
+2. **Tecidos recomendados** (3 opções com justificativa)
+3. **Metragem estimada** (para largura padrão 1,40m-1,50m)
+4. **Aviamentos necessários** (zíper, botões, elástico, forro, entretela, etc.)
+5. **Passo a passo de confecção** resumido (5-8 etapas)
+6. **Dicas profissionais** de acabamento
+7. **Estimativa de preço** de venda sugerido (faixa)
+
+Use emojis para organizar (✂️ 🧵 📐 💡 💰). Formate com markdown. Seja prática e detalhada.`;
+
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-3-flash-preview",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: `Crie a ficha técnica completa para: "${prompt}"` },
+        ],
+      }),
+    });
 
     if (!response.ok) {
+      if (response.status === 429) {
+        return new Response(JSON.stringify({ error: "Muitas solicitações. Aguarde um momento e tente novamente." }), {
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (response.status === 402) {
+        return new Response(JSON.stringify({ error: "Limite de uso atingido temporariamente. Tente novamente mais tarde." }), {
+          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       const errorText = await response.text();
-      console.error("Gemini API error:", response.status, errorText);
-      return new Response(JSON.stringify({ error: "Erro ao gerar imagem. Tente novamente." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      console.error("AI gateway error:", response.status, errorText);
+      return new Response(JSON.stringify({ error: "Erro ao gerar. Tente novamente." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const data = await response.json();
-    const parts = data.candidates?.[0]?.content?.parts || [];
-    
-    let imageBase64: string | null = null;
-    let textContent = "";
+    const description = data.choices?.[0]?.message?.content || "Não foi possível gerar a descrição.";
 
-    for (const part of parts) {
-      if (part.inlineData) {
-        imageBase64 = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
-      }
-      if (part.text) {
-        textContent += part.text;
-      }
-    }
-
-    if (!imageBase64) {
-      return new Response(JSON.stringify({ description: textContent, imageUrl: null, publicImageUrl: null }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    }
-
-    // Upload to storage
-    let publicImageUrl: string | null = null;
-    try {
-      const supabaseAdmin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-      const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, "");
-      const binaryData = Uint8Array.from(atob(base64Data), (c) => c.charCodeAt(0));
-      const fileName = `criacao-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.png`;
-      const { error: uploadError } = await supabaseAdmin.storage.from("generated-images").upload(fileName, binaryData, { contentType: "image/png", upsert: false });
-      if (!uploadError) {
-        const { data: urlData } = supabaseAdmin.storage.from("generated-images").getPublicUrl(fileName);
-        publicImageUrl = urlData.publicUrl;
-      }
-    } catch (e) { console.error("Upload error:", e); }
-
-    return new Response(JSON.stringify({ imageUrl: imageBase64, publicImageUrl, description: textContent }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ description, imageUrl: null, publicImageUrl: null }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   } catch (error) {
     console.error("generate-clothing error:", error);
     return new Response(JSON.stringify({ error: "Erro ao processar. Tente novamente." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
