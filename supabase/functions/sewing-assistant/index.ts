@@ -14,6 +14,8 @@ Você é especialista em:
 2. **Tipos de modelagem e variações** (godê, meio godê, evasê, godê total, reta, etc.)
 3. **Recomendação de tecidos** ideais para cada tipo de peça
 4. **Dicas de costura**, acabamento, forros e aviamentos
+5. **Precificação** de serviços de costura
+6. **Medidas corporais** e como tirar corretamente
 
 ## CONHECIMENTO TÉCNICO DE CÁLCULO DE TECIDO (largura padrão 1,40m a 1,50m)
 
@@ -43,20 +45,14 @@ Você é especialista em:
 - **Blazer curto**: ~1,50m a 1,80m (+ forro)
 - **Blazer longo**: ~2,00m a 2,50m (+ forro)
 
-## TIPOS DE GODÊ
-| Tipo | Tecido Extra | Efeito |
-|------|-------------|--------|
-| **Evasê** | +30-50% | Levemente soltinho |
-| **Meio Godê** | +100% | Balanço moderado |
-| **Godê Total** | +200-300% | Muito rodado |
-
 ## REGRAS
 1. Calcule com base nas medidas quando fornecidas
 2. Mostre variações de godê quando relevante
 3. Recomende 2-3 tecidos ideais
 4. Use emojis (📐 ✂️ 🧵 💡)
 5. Seja prática e direta
-6. Formate com markdown`;
+6. Formate com markdown
+7. Quando perguntarem sobre preço, considere custo do tecido + mão de obra + margem de lucro`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -88,46 +84,46 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Mensagens inválidas" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const GEMINI_KEY = Deno.env.get("GOOGLE_GEMINI_API_KEY");
-    if (!GEMINI_KEY) {
-      return new Response(JSON.stringify({ error: "Chave da API Gemini não configurada." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      return new Response(JSON.stringify({ error: "Chave da API não configurada." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Build Gemini API request
-    const geminiMessages = [{ role: "user", parts: [{ text: systemPrompt }] }, { role: "model", parts: [{ text: "Entendido! Sou a assistente de costura profissional. Como posso ajudar?" }] }];
-    
-    for (const msg of validMessages) {
-      geminiMessages.push({
-        role: msg.role === "assistant" ? "model" : "user",
-        parts: [{ text: msg.content }],
-      });
-    }
-
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: geminiMessages,
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 2048,
-          },
-        }),
-      }
-    );
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-3-flash-preview",
+        messages: [
+          { role: "system", content: systemPrompt },
+          ...validMessages,
+        ],
+        stream: true,
+      }),
+    });
 
     if (!response.ok) {
+      if (response.status === 429) {
+        return new Response(JSON.stringify({ error: "Muitas solicitações. Aguarde um momento e tente novamente." }), {
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (response.status === 402) {
+        return new Response(JSON.stringify({ error: "Limite de uso atingido temporariamente. Tente novamente mais tarde." }), {
+          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       const errorText = await response.text();
-      console.error("Gemini API error:", response.status, errorText);
+      console.error("AI gateway error:", response.status, errorText);
       return new Response(JSON.stringify({ error: "Erro ao processar. Tente novamente." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const data = await response.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Desculpe, não consegui gerar uma resposta.";
-
-    return new Response(JSON.stringify({ response: text }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return new Response(response.body, {
+      headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+    });
   } catch (error) {
     console.error("sewing-assistant error:", error);
     return new Response(JSON.stringify({ error: "Erro ao processar. Tente novamente." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
