@@ -19,6 +19,7 @@ import Assistente from "./pages/Assistente";
 import Loja from "./pages/Loja";
 import NotFound from "./pages/NotFound";
 import QuizFunil from "./pages/QuizFunil";
+import WhatsAppButton from "@/components/WhatsAppButton";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,7 @@ const App = () => (
             <Route path="/loja" element={<ProtectedRoute><Loja /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <WhatsAppButton />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
