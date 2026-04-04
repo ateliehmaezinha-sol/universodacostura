@@ -46,6 +46,8 @@ const App = () => (
             <Route path="/loja" element={<ProtectedRoute><Loja /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <WhatsAppButton />
+          </Routes>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
