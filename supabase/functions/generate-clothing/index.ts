@@ -23,7 +23,7 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Não autorizado" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const { prompt } = await req.json();
+    const { prompt, imageBase64 } = await req.json();
 
     if (!prompt) {
       return new Response(JSON.stringify({ error: "Prompt é obrigatório" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -34,7 +34,21 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Chave da API não configurada." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const systemPrompt = `Você é uma designer de moda profissional brasileira com 20 anos de experiência. 
+    const systemPrompt = imageBase64
+      ? `Você é uma designer de moda profissional brasileira com 20 anos de experiência.
+A usuária vai enviar uma FOTO DE UM TECIDO. Você deve:
+
+1. **Identificar o tecido** da foto (tipo, composição provável, caimento)
+2. **Sugerir 3-5 peças de roupa** que podem ser criadas com esse tecido
+3. Para cada peça sugerida, forneça:
+   - Nome da peça e descrição visual
+   - Metragem estimada (largura 1,40m-1,50m)
+   - Aviamentos necessários
+   - Passo a passo resumido (3-5 etapas)
+   - Estimativa de preço de venda
+
+Use emojis (✂️ 🧵 📐 💡 💰). Formate com markdown. Seja prática e criativa.`
+      : `Você é uma designer de moda profissional brasileira com 20 anos de experiência. 
 Quando a usuária descreve uma peça de roupa, você deve gerar uma ficha técnica completa e detalhada contendo:
 
 1. **Nome da peça** e descrição visual detalhada (silhueta, comprimento, detalhes)
@@ -47,6 +61,13 @@ Quando a usuária descreve uma peça de roupa, você deve gerar uma ficha técni
 
 Use emojis para organizar (✂️ 🧵 📐 💡 💰). Formate com markdown. Seja prática e detalhada.`;
 
+    const userContent: any[] = imageBase64
+      ? [
+          { type: "text", text: prompt },
+          { type: "image_url", image_url: { url: imageBase64 } },
+        ]
+      : [{ type: "text", text: `Crie a ficha técnica completa para: "${prompt}"` }];
+
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -54,10 +75,10 @@ Use emojis para organizar (✂️ 🧵 📐 💡 💰). Formate com markdown. Se
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: imageBase64 ? "google/gemini-2.5-flash" : "google/gemini-3-flash-preview",
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: `Crie a ficha técnica completa para: "${prompt}"` },
+          { role: "user", content: userContent },
         ],
       }),
     });
