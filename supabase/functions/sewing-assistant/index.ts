@@ -76,8 +76,9 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Mensagens são obrigatórias" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    const ALLOWED_ROLES = new Set(["user", "assistant"]);
     const validMessages = messages.slice(-20).filter(
-      (m: any) => m && typeof m.role === "string" && typeof m.content === "string" && m.content.length <= 5000
+      (m: any) => m && ALLOWED_ROLES.has(m.role) && typeof m.content === "string" && m.content.length <= 5000
     );
 
     if (validMessages.length === 0) {
