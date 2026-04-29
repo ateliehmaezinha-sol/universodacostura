@@ -7,6 +7,12 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -15,67 +21,90 @@ serve(async (req) => {
   try {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ error: "Não autorizado" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return json({ error: "Não autorizado" }, 401);
     }
-    const supabaseAuth = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: authHeader } } });
+
+    const supabaseAuth = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } },
+    );
     const { data: { user }, error: userError } = await supabaseAuth.auth.getUser();
     if (userError || !user) {
-      return new Response(JSON.stringify({ error: "Não autorizado" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return json({ error: "Não autorizado" }, 401);
     }
 
-    const { prompt, imageBase64 } = await req.json();
+    let body: any;
+    try {
+      body = await req.json();
+    } catch {
+      return json({ error: "Requisição inválida" }, 400);
+    }
 
-    if (!prompt) {
-      return new Response(JSON.stringify({ error: "Prompt é obrigatório" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const { prompt, imageBase64 } = body ?? {};
+    if (!prompt || typeof prompt !== "string") {
+      return json({ error: "Prompt é obrigatório" }, 400);
     }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
-      return new Response(JSON.stringify({ error: "Chave da API não configurada." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      console.error("LOVABLE_API_KEY ausente");
+      return json({ error: "Chave da API não configurada." }, 500);
     }
 
-    const systemPrompt = imageBase64
+    const hasImage = typeof imageBase64 === "string" && imageBase64.length > 0;
+
+    // Garante que a imagem está como data URI completo
+    let imageDataUrl: string | null = null;
+    if (hasImage) {
+      imageDataUrl = imageBase64.startsWith("data:")
+        ? imageBase64
+        : `data:image/jpeg;base64,${imageBase64}`;
+
+      // Limita tamanho da imagem (~5MB em base64)
+      if (imageDataUrl.length > 7_000_000) {
+        return json(
+          { error: "Imagem muito grande. Use uma foto menor (até 5MB)." },
+          413,
+        );
+      }
+    }
+
+    const systemPrompt = hasImage
       ? `Você é uma designer de moda profissional brasileira com 20 anos de experiência.
-A usuária vai enviar uma FOTO DE UM TECIDO. Você deve:
-
-1. **Identificar o tecido** da foto (tipo, composição provável, caimento)
-2. **Sugerir 3-5 peças de roupa** que podem ser criadas com esse tecido
-3. Para cada peça sugerida, forneça:
-   - Nome da peça e descrição visual
-   - Metragem estimada (largura 1,40m-1,50m)
-   - Aviamentos necessários
-   - Passo a passo resumido (3-5 etapas)
-   - Estimativa de preço de venda
-
-Use emojis (✂️ 🧵 📐 💡 💰). Formate com markdown. Seja prática e criativa.`
+A usuária vai enviar uma FOTO. Você deve:
+1. Identificar visualmente o que está na foto (tecido ou peça pronta)
+2. Sugerir 3-5 peças de roupa ou ficha técnica para reproduzir
+3. Para cada peça forneça: nome, descrição, metragem (largura 1,40m-1,50m), aviamentos, passo a passo (3-5 etapas) e estimativa de preço.
+Use emojis (✂️ 🧵 📐 💡 💰) e markdown.`
       : `Você é uma designer de moda profissional brasileira com 20 anos de experiência. 
-Quando a usuária descreve uma peça de roupa, você deve gerar uma ficha técnica completa e detalhada contendo:
+Quando a usuária descreve uma peça, gere ficha técnica completa:
+1. Nome e descrição visual
+2. Tecidos recomendados (3 opções)
+3. Metragem estimada (1,40m-1,50m)
+4. Aviamentos
+5. Passo a passo (5-8 etapas)
+6. Dicas de acabamento
+7. Estimativa de preço de venda
+Use emojis (✂️ 🧵 📐 💡 💰) e markdown.`;
 
-1. **Nome da peça** e descrição visual detalhada (silhueta, comprimento, detalhes)
-2. **Tecidos recomendados** (3 opções com justificativa)
-3. **Metragem estimada** (para largura padrão 1,40m-1,50m)
-4. **Aviamentos necessários** (zíper, botões, elástico, forro, entretela, etc.)
-5. **Passo a passo de confecção** resumido (5-8 etapas)
-6. **Dicas profissionais** de acabamento
-7. **Estimativa de preço** de venda sugerido (faixa)
-
-Use emojis para organizar (✂️ 🧵 📐 💡 💰). Formate com markdown. Seja prática e detalhada.`;
-
-    const userContent: any[] = imageBase64
+    const userContent: any = hasImage
       ? [
           { type: "text", text: prompt },
-          { type: "image_url", image_url: { url: imageBase64 } },
+          { type: "image_url", image_url: { url: imageDataUrl } },
         ]
-      : [{ type: "text", text: `Crie a ficha técnica completa para: "${prompt}"` }];
+      : `Crie a ficha técnica completa para: "${prompt}"`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const model = hasImage ? "google/gemini-2.5-flash" : "google/gemini-2.5-flash";
+
+    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: imageBase64 ? "google/gemini-2.5-flash" : "google/gemini-3-flash-preview",
+        model,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userContent },
@@ -83,30 +112,32 @@ Use emojis para organizar (✂️ 🧵 📐 💡 💰). Formate com markdown. Se
       }),
     });
 
-    if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Muitas solicitações. Aguarde um momento e tente novamente." }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+    if (!aiResponse.ok) {
+      const errorText = await aiResponse.text();
+      console.error("AI gateway error:", aiResponse.status, errorText);
+
+      if (aiResponse.status === 429) {
+        return json({ error: "Muitas solicitações. Aguarde e tente novamente." }, 429);
       }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Limite de uso atingido temporariamente. Tente novamente mais tarde." }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+      if (aiResponse.status === 402) {
+        return json({ error: "Limite de uso atingido. Tente mais tarde." }, 402);
       }
-      const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
-      return new Response(JSON.stringify({ error: "Erro ao gerar. Tente novamente." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return json({
+        error: `Erro ao gerar (${aiResponse.status}). Tente novamente${hasImage ? " com uma foto menor ou mais nítida" : ""}.`,
+      }, 500);
     }
 
-    const data = await response.json();
-    const description = data.choices?.[0]?.message?.content || "Não foi possível gerar a descrição.";
+    const data = await aiResponse.json();
+    const description = data?.choices?.[0]?.message?.content;
 
-    return new Response(JSON.stringify({ description, imageUrl: null, publicImageUrl: null }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    if (!description) {
+      console.error("Resposta sem conteúdo:", JSON.stringify(data).slice(0, 500));
+      return json({ error: "A IA não retornou conteúdo. Tente novamente." }, 500);
+    }
+
+    return json({ description, imageUrl: null, publicImageUrl: null });
   } catch (error) {
-    console.error("generate-clothing error:", error);
-    return new Response(JSON.stringify({ error: "Erro ao processar. Tente novamente." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    console.error("generate-clothing exception:", error);
+    return json({ error: "Erro ao processar. Tente novamente." }, 500);
   }
 });
