@@ -158,7 +158,71 @@ Use emojis (✂️ 🧵 📐 💡 💰) e markdown.`;
       return json({ error: "A IA não retornou conteúdo. Tente novamente." }, 500);
     }
 
-    return json({ description, imageUrl: null, publicImageUrl: null });
+    // ========= GERAR IMAGEM DO MODELO DA ROUPA =========
+    let publicImageUrl: string | null = null;
+    try {
+      const imagePrompt = hasImage && isFabricMode
+        ? `Fashion editorial photo of a model wearing an elegant outfit made from the fabric shown. Based on these design suggestions: ${description.slice(0, 1500)}. Professional fashion photography, full body, neutral background, soft lighting, high quality, realistic.`
+        : hasImage && isGarmentMode
+        ? `Fashion editorial photo of a model wearing this exact garment, recreated faithfully. Full body, neutral background, professional fashion photography, soft lighting, realistic, high quality.`
+        : `Fashion editorial photo of a model wearing: ${prompt}. Based on this technical sheet: ${description.slice(0, 1200)}. Professional fashion photography, full body, neutral background, soft lighting, realistic, high quality.`;
+
+      const imageMessages: any[] = [
+        { role: "user", content: hasImage
+          ? [
+              { type: "text", text: imagePrompt },
+              { type: "image_url", image_url: { url: imageDataUrl } },
+            ]
+          : imagePrompt
+        },
+      ];
+
+      const imgResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash-image",
+          messages: imageMessages,
+          modalities: ["image", "text"],
+        }),
+      });
+
+      if (imgResponse.ok) {
+        const imgData = await imgResponse.json();
+        const imageUrl = imgData?.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+
+        if (imageUrl?.startsWith("data:")) {
+          // Upload para storage
+          const supabaseService = createClient(
+            Deno.env.get("SUPABASE_URL")!,
+            Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+          );
+          const base64Data = imageUrl.split(",")[1];
+          const bytes = Uint8Array.from(atob(base64Data), (c) => c.charCodeAt(0));
+          const fileName = `${user.id}/${Date.now()}.png`;
+          const { error: upErr } = await supabaseService.storage
+            .from("generated-images")
+            .upload(fileName, bytes, { contentType: "image/png", upsert: false });
+          if (!upErr) {
+            const { data: signed } = await supabaseService.storage
+              .from("generated-images")
+              .createSignedUrl(fileName, 60 * 60 * 24 * 7);
+            publicImageUrl = signed?.signedUrl ?? null;
+          } else {
+            console.error("Upload error:", upErr);
+          }
+        }
+      } else {
+        console.error("Image generation failed:", imgResponse.status, await imgResponse.text());
+      }
+    } catch (imgErr) {
+      console.error("Image generation exception:", imgErr);
+    }
+
+    return json({ description, imageUrl: publicImageUrl, publicImageUrl });
   } catch (error) {
     console.error("generate-clothing exception:", error);
     return json({ error: "Erro ao processar. Tente novamente." }, 500);
