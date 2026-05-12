@@ -27,6 +27,7 @@ export default function Criador() {
   const [mode, setMode] = useState<CriadorMode>("fabric");
   const [imagem, setImagem] = useState<string | null>(null);
   const [resultado, setResultado] = useState<string | null>(null);
+  const [modelImage, setModelImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [comando, setComando] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
@@ -35,6 +36,7 @@ export default function Criador() {
   const gerarComFoto = async (imageBase64: string) => {
     setIsLoading(true);
     setResultado(null);
+    setModelImage(null);
 
     try {
       const { data, error } = await supabase.functions.invoke("generate-clothing", {
@@ -53,6 +55,7 @@ export default function Criador() {
         setResultado(`❌ ${data.error}`);
       } else {
         setResultado(data.description);
+        setModelImage(data.publicImageUrl || data.imageUrl || null);
       }
     } catch (err) {
       console.error(err);
@@ -66,6 +69,7 @@ export default function Criador() {
     if (!comando.trim() || isLoading) return;
     setIsLoading(true);
     setResultado(null);
+    setModelImage(null);
 
     try {
       const { data, error } = await supabase.functions.invoke("generate-clothing", {
@@ -78,6 +82,7 @@ export default function Criador() {
         setResultado(`❌ ${data.error}`);
       } else {
         setResultado(data.description);
+        setModelImage(data.publicImageUrl || data.imageUrl || null);
       }
     } catch (err) {
       console.error(err);
@@ -108,6 +113,7 @@ export default function Criador() {
   const resetImage = () => {
     setImagem(null);
     setResultado(null);
+    setModelImage(null);
     if (fileRef.current) fileRef.current.value = "";
     if (cameraRef.current) cameraRef.current.value = "";
   };
@@ -271,6 +277,12 @@ export default function Criador() {
                   <Sparkles size={18} className="text-accent" />
                   Ficha Técnica
                 </h3>
+                {modelImage && (
+                  <div className="mb-4 overflow-hidden rounded-xl border border-border">
+                    <img src={modelImage} alt="Modelo da roupa gerada" className="w-full object-cover" />
+                    <p className="px-3 py-2 text-xs text-muted-foreground bg-card">✨ Modelo gerado por IA</p>
+                  </div>
+                )}
                 <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
                   <ReactMarkdown>{resultado}</ReactMarkdown>
                 </div>
