@@ -41,7 +41,7 @@ serve(async (req) => {
       return json({ error: "Requisição inválida" }, 400);
     }
 
-    const { prompt, imageBase64 } = body ?? {};
+    const { prompt, imageBase64, mode } = body ?? {};
     if (!prompt || typeof prompt !== "string") {
       return json({ error: "Prompt é obrigatório" }, 400);
     }
@@ -70,14 +70,35 @@ serve(async (req) => {
       }
     }
 
-    const systemPrompt = hasImage
-      ? `Você é uma designer de moda profissional brasileira com 20 anos de experiência.
-A usuária vai enviar uma FOTO. Você deve:
-1. Identificar visualmente o que está na foto (tecido ou peça pronta)
-2. Sugerir 3-5 peças de roupa ou ficha técnica para reproduzir
-3. Para cada peça forneça: nome, descrição, metragem (largura 1,40m-1,50m), aviamentos, passo a passo (3-5 etapas) e estimativa de preço.
-Use emojis (✂️ 🧵 📐 💡 💰) e markdown.`
-      : `Você é uma designer de moda profissional brasileira com 20 anos de experiência. 
+    const isFabricMode = mode === "fabric" || (hasImage && mode !== "garment");
+    const isGarmentMode = mode === "garment";
+
+    let systemPrompt: string;
+    if (hasImage && isFabricMode) {
+      systemPrompt = `Você é uma designer de moda profissional brasileira com 20 anos de experiência criando peças no Atelieh Mãezinha.
+A usuária enviou uma FOTO DE TECIDO. Sua missão:
+1. Analise visualmente o tecido: tipo provável (algodão, viscose, malha, crepe, linho, jeans, etc), peso/caimento, estampa/cor, brilho, transparência.
+2. Sugira de 4 a 6 PEÇAS DE ROUPA ideais para esse tecido, considerando os nichos: Feminino, Evangélico (modesto) e Infantil.
+3. Para CADA peça, traga em markdown bem formatado:
+   - ## Nome da peça (com emoji)
+   - **Por que combina com este tecido:** breve justificativa técnica
+   - **Metragem:** estimativa (largura 1,40m / 1,50m)
+   - **Aviamentos:** linha, zíper, elástico, entretela, etc
+   - **Passo a passo resumido:** 3 a 5 etapas
+   - **Preço sugerido de venda:** faixa em R$
+Use emojis (✂️ 🧵 📐 💡 💰 👗) e markdown limpo. Responda SEMPRE em português do Brasil.`;
+    } else if (hasImage && isGarmentMode) {
+      systemPrompt = `Você é uma designer de moda brasileira. A usuária enviou foto de uma ROUPA PRONTA.
+Crie a FICHA TÉCNICA COMPLETA para reproduzir a peça:
+1. Nome e descrição detalhada
+2. Tecidos recomendados (com gramatura)
+3. Metragem (largura 1,40m / 1,50m) e aviamentos
+4. Passo a passo de costura (6-10 etapas)
+5. Dicas de acabamento profissional
+6. Preço sugerido de venda
+Use emojis (✂️ 🧵 📐 💡 💰) e markdown. Responda em português do Brasil.`;
+    } else {
+      systemPrompt = `Você é uma designer de moda profissional brasileira com 20 anos de experiência. 
 Quando a usuária descreve uma peça, gere ficha técnica completa:
 1. Nome e descrição visual
 2. Tecidos recomendados (3 opções)
@@ -87,15 +108,17 @@ Quando a usuária descreve uma peça, gere ficha técnica completa:
 6. Dicas de acabamento
 7. Estimativa de preço de venda
 Use emojis (✂️ 🧵 📐 💡 💰) e markdown.`;
+    }
 
+    const userTextForFabric = "Analise este tecido e me sugira de 4 a 6 peças de roupa ideais para confeccionar com ele, com ficha resumida de cada peça.";
     const userContent: any = hasImage
       ? [
-          { type: "text", text: prompt },
+          { type: "text", text: isFabricMode ? userTextForFabric : prompt },
           { type: "image_url", image_url: { url: imageDataUrl } },
         ]
       : `Crie a ficha técnica completa para: "${prompt}"`;
 
-    const model = hasImage ? "google/gemini-2.5-flash" : "google/gemini-2.5-flash";
+    const model = "google/gemini-2.5-pro";
 
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
