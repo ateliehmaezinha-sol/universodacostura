@@ -27,6 +27,7 @@ export default function Criador() {
   const [mode, setMode] = useState<CriadorMode>("fabric");
   const [imagem, setImagem] = useState<string | null>(null);
   const [resultado, setResultado] = useState<string | null>(null);
+  const [modelImage, setModelImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [comando, setComando] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
