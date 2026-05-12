@@ -277,6 +277,12 @@ export default function Criador() {
                   <Sparkles size={18} className="text-accent" />
                   Ficha Técnica
                 </h3>
+                {modelImage && (
+                  <div className="mb-4 overflow-hidden rounded-xl border border-border">
+                    <img src={modelImage} alt="Modelo da roupa gerada" className="w-full object-cover" />
+                    <p className="px-3 py-2 text-xs text-muted-foreground bg-card">✨ Modelo gerado por IA</p>
+                  </div>
+                )}
                 <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
                   <ReactMarkdown>{resultado}</ReactMarkdown>
                 </div>
