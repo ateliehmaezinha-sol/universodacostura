@@ -41,8 +41,9 @@ export default function Criador() {
         body: {
           prompt: mode === "garment"
             ? "Analise esta roupa pronta e crie a ficha técnica completa para reproduzi-la: tecidos, metragem, aviamentos e passo a passo"
-            : "Crie sugestões de roupas que podem ser feitas com este tecido da foto",
+            : "Analise este tecido e sugira de 4 a 6 peças de roupa ideais para confeccionar com ele",
           imageBase64,
+          mode,
         },
       });
 
