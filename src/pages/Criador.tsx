@@ -36,6 +36,7 @@ export default function Criador() {
   const gerarComFoto = async (imageBase64: string) => {
     setIsLoading(true);
     setResultado(null);
+    setModelImage(null);
 
     try {
       const { data, error } = await supabase.functions.invoke("generate-clothing", {
@@ -54,6 +55,7 @@ export default function Criador() {
         setResultado(`❌ ${data.error}`);
       } else {
         setResultado(data.description);
+        setModelImage(data.publicImageUrl || data.imageUrl || null);
       }
     } catch (err) {
       console.error(err);
@@ -67,6 +69,7 @@ export default function Criador() {
     if (!comando.trim() || isLoading) return;
     setIsLoading(true);
     setResultado(null);
+    setModelImage(null);
 
     try {
       const { data, error } = await supabase.functions.invoke("generate-clothing", {
@@ -79,6 +82,7 @@ export default function Criador() {
         setResultado(`❌ ${data.error}`);
       } else {
         setResultado(data.description);
+        setModelImage(data.publicImageUrl || data.imageUrl || null);
       }
     } catch (err) {
       console.error(err);
@@ -109,6 +113,7 @@ export default function Criador() {
   const resetImage = () => {
     setImagem(null);
     setResultado(null);
+    setModelImage(null);
     if (fileRef.current) fileRef.current.value = "";
     if (cameraRef.current) cameraRef.current.value = "";
   };
