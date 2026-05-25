@@ -29,6 +29,12 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Peça e medidas são obrigatórias" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    const invalid = (msg: string) => new Response(JSON.stringify({ error: msg }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    if (typeof peca !== "string" || peca.length > 500) return invalid("Peça inválida.");
+    if (typeof medidas !== "string" || medidas.length > 2000) return invalid("Medidas inválidas.");
+    if (tipoMedida !== undefined && tipoMedida !== null && (typeof tipoMedida !== "string" || tipoMedida.length > 100)) return invalid("Tipo de medida inválido.");
+    if (nomeCliente !== undefined && nomeCliente !== null && (typeof nomeCliente !== "string" || nomeCliente.length > 200)) return invalid("Nome do cliente inválido.");
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       return new Response(JSON.stringify({ error: "Chave da API não configurada." }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
