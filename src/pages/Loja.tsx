@@ -3,7 +3,7 @@ import { ExternalLink, ShoppingBag, Sparkles, Scissors, Heart, Tablet } from "lu
 import AppLayout from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 
-const LOJA_URL = "https://www.lojadasmusas.com/universodacosturadasol";
+const LOJA_URL = "https://lojadasmusas.com/solessenciafeminina";
 
 const categorias = [
   {
