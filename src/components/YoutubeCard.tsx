@@ -6,25 +6,9 @@ import logoImg from "@/assets/logo-atelieh.png";
 const YOUTUBE_URL = "https://www.youtube.com/@cursodecosturaexpressol";
 
 export default function YoutubeCard() {
-  const openChannelInNewTab = () => {
-    const tab = window.open("about:blank", "_blank");
-    if (tab) {
-      tab.opener = null;
-      tab.location.href = YOUTUBE_URL;
-    }
-  };
-
   return (
     <Card className="p-6 flex flex-col items-center gap-4 card-hover max-w-sm">
-      <a
-        href={YOUTUBE_URL}
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={(event) => {
-          event.preventDefault();
-          openChannelInNewTab();
-        }}
-      >
+      <a href={YOUTUBE_URL} target="_blank" rel="noopener noreferrer">
         <img
           src={logoImg}
           alt="Logo Atelieh Mãezinha"
@@ -37,9 +21,11 @@ export default function YoutubeCard() {
       <p className="text-sm text-muted-foreground text-center">
         Curso de Costura Estrelas de Sucesso Express
       </p>
-      <Button className="gap-2" onClick={openChannelInNewTab}>
-        <Youtube className="h-4 w-4" />
-        Acessar Canal
+      <Button asChild className="gap-2">
+        <a href={YOUTUBE_URL} target="_blank" rel="noopener noreferrer">
+          <Youtube className="h-4 w-4" />
+          Acessar Canal
+        </a>
       </Button>
     </Card>
   );
