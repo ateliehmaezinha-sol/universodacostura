@@ -32,6 +32,26 @@ serve(async (req) => {
       });
     }
 
+    const MAX_B64 = 7_000_000; // ~5 MB decoded
+    if (typeof imageBase64 !== "string" || imageBase64.length > MAX_B64) {
+      return new Response(JSON.stringify({ error: "Imagem muito grande. Envie uma imagem menor." }), {
+        status: 413,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (mode !== undefined && mode !== null && !["fabric", "garment", "roupa", "tecido"].includes(mode)) {
+      return new Response(JSON.stringify({ error: "Modo inválido." }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (userFeedback !== undefined && userFeedback !== null && (typeof userFeedback !== "string" || userFeedback.length > 500)) {
+      return new Response(JSON.stringify({ error: "Feedback muito longo." }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
