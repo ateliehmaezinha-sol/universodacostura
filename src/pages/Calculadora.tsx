@@ -109,7 +109,7 @@ export default function Calculadora() {
               animate={{ opacity: 1, x: 0 }}
               className="space-y-4"
             >
-              <h3 className="font-display text-xl font-semibold">Resultado</h3>
+              <h2 className="font-display text-xl font-semibold">Resultado</h2>
               {[
                 { label: "Preço Mínimo", value: resultado.min, color: "bg-secondary", desc: "Para clientes regulares" },
                 { label: "Preço Médio", value: resultado.med, color: "bg-accent/10", desc: "Valor recomendado" },

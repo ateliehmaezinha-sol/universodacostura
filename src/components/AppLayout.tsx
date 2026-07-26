@@ -37,7 +37,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-background">
       {/* Mobile header */}
       <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-primary px-4 py-3 flex items-center justify-between">
-        <button onClick={() => setSidebarOpen(true)} className="text-primary-foreground">
+        <button onClick={() => setSidebarOpen(true)} aria-label="Abrir menu de navegação" className="text-primary-foreground">
           <Menu size={24} />
         </button>
         <h1 className="font-display text-lg text-primary-foreground">Atelieh Mãezinha</h1>
@@ -64,7 +64,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             >
               <div className="flex items-center justify-between mb-8">
                 <span className="font-display text-xl text-primary-foreground">✨ Atelieh Mãezinha</span>
-                <button onClick={() => setSidebarOpen(false)} className="text-primary-foreground/70">
+                <button onClick={() => setSidebarOpen(false)} aria-label="Fechar menu de navegação" className="text-primary-foreground/70">
                   <X size={20} />
                 </button>
               </div>
