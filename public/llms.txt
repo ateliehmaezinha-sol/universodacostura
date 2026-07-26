@@ -1,0 +1,8 @@
+# Atelieh Mãezinha — Universo da Costura com a Sol
+
+> Assistente inteligente para costureiras e ateliês: precificação de serviços, identificação de tecidos por IA, criação de roupas com ficha técnica e organização do atelieh. Parte do Curso de Costura Estrelas de Sucesso Express da Sol.
+
+## Pages
+
+- [Início / Login](/): Página inicial do app Atelieh Mãezinha, com acesso à plataforma.
+- [Quiz Funil](/quiz): Quiz interativo sobre corte e costura que apresenta o Curso Estrelas de Sucesso Express.

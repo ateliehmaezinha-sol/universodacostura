@@ -106,7 +106,7 @@ export default function Login() {
           >
             ✨
           </motion.div>
-          <h1 className="font-display text-3xl font-bold text-primary-foreground">Atelieh Mãezinha</h1>
+          <h1 className="font-display text-3xl font-bold text-primary-foreground">Atelieh Mãezinha — Curso de Costura Estrelas de Sucesso</h1>
           <p className="text-primary-foreground/50 text-sm mt-1">Curso de Costura Estrelas de Sucesso Express</p>
           <p className="text-primary-foreground/40 text-xs mt-1">Universo da Costura com a Sol</p>
         </div>
@@ -132,7 +132,7 @@ export default function Login() {
             <Label htmlFor="senha">Senha</Label>
             <div className="relative">
               <Input id="senha" type={showPassword ? "text" : "password"} placeholder="Sua senha" value={form.senha} onChange={(e) => setForm({ ...form, senha: e.target.value })} required minLength={6} className="pr-10" />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+              <button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
