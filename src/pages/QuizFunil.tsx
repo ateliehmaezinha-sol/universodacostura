@@ -462,6 +462,6 @@ export default function QuizFunil() {
           </Button>
         </div>
       )}
-    </div>
+    </main>
   );
 }
