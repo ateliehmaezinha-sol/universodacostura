@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,12 +18,19 @@ const estados = [
 
 export default function Login() {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
   const { toast } = useToast();
   const { user, loading } = useAuth();
   const [isRegister, setIsRegister] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ nome: "", email: "", senha: "", cidade: "", estado: "", profissao: "" });
   const [showPassword, setShowPassword] = useState(false);
+
+  // Same-origin relative path to return to after auth (used by OAuth consent flow).
+  const rawNext = params.get("next") ?? "";
+  const nextPath = rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "";
+  const postAuthTarget = nextPath || "/dashboard";
+  const emailRedirectTo = `${window.location.origin}${postAuthTarget}`;
 
   if (loading) {
     return (
@@ -34,7 +41,7 @@ export default function Login() {
   }
 
   if (user) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to={postAuthTarget} replace />;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -53,7 +60,7 @@ export default function Login() {
               estado: form.estado,
               profissao: form.profissao,
             },
-            emailRedirectTo: window.location.origin,
+            emailRedirectTo,
           },
         });
 
@@ -74,7 +81,7 @@ export default function Login() {
           return;
         }
 
-        navigate("/dashboard");
+        navigate(postAuthTarget);
       }
     } catch {
       toast({ title: "Erro", description: "Tente novamente.", variant: "destructive" });
