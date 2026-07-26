@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Helmet } from "react-helmet-async";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -81,7 +82,15 @@ export default function QuizFunil() {
   const pad = (n: number) => String(n).padStart(2, "0");
 
   return (
-    <div className="min-h-screen font-body">
+    <main className="min-h-screen font-body">
+      <Helmet>
+        <title>Quiz Costura: Você está perdendo dinheiro? | Atelieh Mãezinha</title>
+        <meta name="description" content="Faça o teste gratuito em 2 minutos e descubra se você está perdendo dinheiro na costura. Acesse o app UniCost IA para precificar, calcular tecidos e criar modelos." />
+        <link rel="canonical" href="https://universodacostura.lovable.app/quiz" />
+        <meta property="og:title" content="Quiz Costura: Você está perdendo dinheiro?" />
+        <meta property="og:url" content="https://universodacostura.lovable.app/quiz" />
+        <meta property="og:description" content="Teste gratuito em 2 minutos para costureiras — descubra erros de precificação, cálculo de tecido e modelagem." />
+      </Helmet>
       {/* BARRA FIXA TOPO */}
       <div className="fixed top-0 left-0 right-0 z-50 bg-foreground text-accent text-center py-2 px-4 text-sm font-semibold flex items-center justify-center gap-2">
         <AlertTriangle size={16} />
@@ -117,7 +126,7 @@ export default function QuizFunil() {
             </Button>
           </motion.div>
           <motion.div initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7, delay: 0.2 }} className="flex justify-center">
-            <img src={heroImg} alt="Costureira feliz no ateliê" className="rounded-3xl shadow-2xl max-w-md w-full object-cover" />
+            <img src={heroImg} alt="Costureira feliz no ateliê" width={512} height={512} fetchPriority="high" decoding="async" className="rounded-3xl shadow-2xl max-w-md w-full object-cover" />
           </motion.div>
         </div>
       </section>
@@ -453,6 +462,6 @@ export default function QuizFunil() {
           </Button>
         </div>
       )}
-    </div>
+    </main>
   );
 }

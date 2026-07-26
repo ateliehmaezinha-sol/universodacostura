@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 
 const estados = [
   "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA",
@@ -91,7 +92,15 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-primary p-4">
+    <main className="min-h-screen flex items-center justify-center bg-primary p-4">
+      <Helmet>
+        <title>Entrar — Atelieh Mãezinha | Curso de Costura Estrelas de Sucesso</title>
+        <meta name="description" content="Acesse o Atelieh Mãezinha: assistente IA para costureiras precificarem serviços, identificarem tecidos e organizarem o ateliê." />
+        <link rel="canonical" href="https://universodacostura.lovable.app/" />
+        <meta property="og:title" content="Entrar — Atelieh Mãezinha" />
+        <meta property="og:url" content="https://universodacostura.lovable.app/" />
+        <meta property="og:description" content="Acesse o Atelieh Mãezinha: assistente IA para costureiras precificarem serviços, identificarem tecidos e organizarem o ateliê." />
+      </Helmet>
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -107,8 +116,8 @@ export default function Login() {
             ✨
           </motion.div>
           <h1 className="font-display text-3xl font-bold text-primary-foreground">Atelieh Mãezinha — Curso de Costura Estrelas de Sucesso</h1>
-          <p className="text-primary-foreground/50 text-sm mt-1">Curso de Costura Estrelas de Sucesso Express</p>
-          <p className="text-primary-foreground/40 text-xs mt-1">Universo da Costura com a Sol</p>
+          <p className="text-primary-foreground/90 text-sm mt-1">Curso de Costura Estrelas de Sucesso Express</p>
+          <p className="text-primary-foreground/80 text-xs mt-1">Universo da Costura com a Sol</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-background rounded-3xl p-8 shadow-2xl space-y-4">
@@ -176,6 +185,6 @@ export default function Login() {
           </p>
         </form>
       </motion.div>
-    </div>
+    </main>
   );
 }
