@@ -49,7 +49,7 @@ export default function Dashboard() {
                 <h2 className="font-display font-semibold text-lg mb-1 group-hover:text-accent transition-colors">
 
                   {f.label}
-                </h3>
+                </h2>
                 <p className="text-sm text-muted-foreground">{f.desc}</p>
               </Link>
             </motion.div>
