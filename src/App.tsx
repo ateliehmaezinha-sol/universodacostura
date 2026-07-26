@@ -19,6 +19,7 @@ import Assistente from "./pages/Assistente";
 import Loja from "./pages/Loja";
 import NotFound from "./pages/NotFound";
 import QuizFunil from "./pages/QuizFunil";
+import OAuthConsent from "./pages/OAuthConsent";
 import WhatsAppButton from "@/components/WhatsAppButton";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Login />} />
             <Route path="/quiz" element={<QuizFunil />} />
+            <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/calculadora" element={<ProtectedRoute><Calculadora /></ProtectedRoute>} />
             <Route path="/identificador" element={<ProtectedRoute><Identificador /></ProtectedRoute>} />
